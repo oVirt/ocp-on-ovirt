@@ -97,7 +97,6 @@ func filterReleasesLinks(e *colly.HTMLElement) {
 	if !reRelease.MatchString(e.Text) {
 		return
 	}
-	// fmt.Println(e.Text)
 	d := strings.SplitN(e.Text, "-", 3)[2]
 	d = strings.Split(d, " ")[0]
 	tr, err := time.Parse(PR_DATE_FORMAT, d)
@@ -127,9 +126,6 @@ func setupReleaseStatusCrawler(debug bool) {
 	releaseStatusCrawler = colly.NewCollector(
 		colly.AllowedDomains(OPENSHIFT_RELEASE_DOMAIN),
 		colly.MaxDepth(1),
-		// Cache responses to prevent multiple download of pages
-		// even if the collector is restarted
-		colly.CacheDir("/tmp"),
 	)
 	if debug == true {
 		releaseStatusCrawler.OnRequest(func(r *colly.Request) {
@@ -144,9 +140,6 @@ func setupReleasePageCrawler(debug bool) {
 		colly.AllowedDomains(OPENSHIFT_RELEASE_DOMAIN),
 		colly.MaxDepth(1),
 		colly.Async(true),
-		// Cache responses to prevent multiple download of pages
-		// even if the collector is restarted
-		colly.CacheDir("/tmp"),
 	)
 	//Set max Parallelism and introduce a Random Delay
 	releasePageCrawler.Limit(&colly.LimitRule{
@@ -163,14 +156,9 @@ func setupReleasePageCrawler(debug bool) {
 
 func main() {
 	var err error
-	if len(os.Args) != 2 {
-		fmt.Println("expected PR url as a parameter")
-		os.Exit(1)
-	}
-	url := os.Args[1]
 	debug := flag.Bool("debug", false, "run with debug")
 	flag.Parse()
-
+	url := flag.Arg(0)
 	prd, err = createPullRequestData(url)
 	if err != nil {
 		panic(err)
