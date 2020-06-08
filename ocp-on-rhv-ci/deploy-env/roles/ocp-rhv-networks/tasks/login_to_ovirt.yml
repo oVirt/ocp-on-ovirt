@@ -1,0 +1,14 @@
+- name: download CA file from engine
+  get_url:
+      url: "https://{{ ovirt_engine_url | urlsplit('hostname') }}/ovirt-engine/services/pki-resource?resource=ca-certificate&format=X509-PEM-CA"
+      dest: "/tmp/ca.pem"
+      validate_certs: no
+
+- name: Login to RHV
+  ovirt_auth:
+      url: "{{ ovirt_engine_url }}"
+      username: "{{ ovirt_engine_username }}"
+      password: "{{ ovirt_engine_password }}"
+      ca_file: "/tmp/ca.pem"
+      insecure: "true"
+

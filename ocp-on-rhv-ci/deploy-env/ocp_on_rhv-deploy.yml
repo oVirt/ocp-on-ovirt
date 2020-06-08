@@ -1,0 +1,11 @@
+
+---
+  - name: create ocp-for-rhv CI env
+    hosts: localhost
+    connection: local
+
+    tasks:
+    # create oVirt OVN networks for running OCP VMs.
+      - import_role:
+          name: ocp-rhv-networks
+        tags: networks

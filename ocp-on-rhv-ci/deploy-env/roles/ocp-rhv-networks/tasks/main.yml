@@ -1,0 +1,72 @@
+---
+
+- include_tasks: login_to_ovirt.yml
+
+#create ovn network using ovirt_network (ovirtsdk4)
+- ovirt_network:
+    data_center: "{{data_center_name}}"
+    name: "{{item}}"
+    vm_network: yes
+    external_provider: ovirt-provider-ovn
+    auth: "{{ ovirt_auth }}"
+    #fetch_nested: yes
+    wait: yes
+    state: present
+  with_sequence: "start={{ocp_network_start}} count={{ocp_network_count}} format={{ocp_network_prefix}}-%02d"
+  register: networks
+
+- name: debug
+  debug: "msg={{networks}}"
+
+# disable port security for OVN networks
+# since ovirt_network doesnt support specifying port_security option
+# we need to disable them using neutron API
+- block:
+
+  - name: auth with keystone
+    uri:
+      url: "{{keyston_api}}/tokens"
+      method: POST
+      body:
+        auth:
+          passwordCredentials:
+            username: "{{ lookup('env','OVIRT_ENGINE_USERNAME') }}"
+            password: "{{ lookup('env','OVIRT_ENGINE_PASSWORD') }}"
+      body_format: json
+      status_code: 200
+      validate_certs: no
+    register: token_json
+
+  - name: list all the OVN networks
+    uri:
+      url: "{{neutron_api}}/networks.json"
+      method: GET
+      headers:
+        X-Auth-Token: "{{ token_json.json.access.token.id }}"
+      status_code: 200
+      validate_certs: no
+    register: neutron_networks
+    when:
+    - token_json.json.access
+
+  - name: debug
+    debug: "msg={{neutron_networks}}"
+
+  - name: disable port security for each network
+    uri:
+      url: "{{neutron_api}}/networks/{{ item.id }}"
+      method: PUT
+      body:
+        network:
+          port_security_enabled: False
+      body_format: json
+      headers:
+        X-Auth-Token: "{{ token_json.json.access.token.id }}"
+      status_code: 200
+      validate_certs: no
+    when:
+    - token_json.json.access
+    with_items: "{{neutron_networks.json.networks}}"
+
+
+
