@@ -1,0 +1,135 @@
+global
+    # to have these messages end up in /var/log/haproxy.log you will
+    # need to:
+    #
+    # 1) configure syslog to accept network log events.  This is done
+    #    by adding the '-r' option to the SYSLOGD_OPTIONS in
+    #    /etc/sysconfig/syslog
+    #
+    # 2) configure local2 events to go to the /var/log/haproxy.log
+    #   file. A line like the following can be added to
+    #   /etc/sysconfig/syslog
+    #
+    #    local2.*                       /var/log/haproxy.log
+    #
+    log 127.0.0.1:514  local0  info
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    maxconn     5000
+    user        haproxy
+    group       haproxy
+    daemon
+
+    # turn on stats unix socket
+    stats socket /var/lib/haproxy/stats
+
+# Adjust the timeout to your needs
+defaults
+  timeout client 240s
+  timeout server 240s
+  timeout connect 30s
+  timeout check 5s
+  option tcplog
+  log global
+
+frontend ft_ssl_api
+  bind {{external_address}}:6443
+
+  mode tcp
+  tcp-request inspect-delay 5s
+  tcp-request content accept if { req_ssl_hello_type 1 }
+
+{% for it in ocp_networks %}
+# configuration for {{ it.name }}
+  acl sni-api-{{ it.name }} req_ssl_sni -i {{ it.api_fqdn }}
+  use_backend bk_api-{{ it.name }} if sni-api-{{ it.name }}
+
+{% endfor %}
+  default_backend bk_ssl_default
+
+frontend ft_ssl_443
+  bind {{external_address}}:443
+
+  mode tcp
+  tcp-request inspect-delay 5s
+  tcp-request content accept if { req_ssl_hello_type 1 }
+
+{% for it in ocp_networks %}
+  acl sni-apps-{{ it.name }} req_ssl_sni -m end {{ it.apps_fqdn }}
+  use_backend bk_apps-{{ it.name }} if sni-apps-{{ it.name }}
+{% endfor %}
+
+  default_backend bk_ssl_default
+
+{% for it in ocp_networks %}
+backend bk_apps-{{ it.name }}
+  mode tcp
+  balance roundrobin
+  # maximum SSL session ID length is 32 bytes.
+  stick-table type binary len 32 size 30k expire 30m
+  acl clienthello req_ssl_hello_type 1
+  acl serverhello rep_ssl_hello_type 2
+  # use tcp content accepts to detects ssl client and server hello.
+  tcp-request inspect-delay 5s
+  tcp-request content accept if clienthello
+  # no timeout on response inspect delay by default.
+  tcp-response content accept if serverhello
+  stick on payload_lv(43,1) if clienthello
+  # Learn on response if server hello.
+  stick store-response payload_lv(43,1) if serverhello
+  option ssl-hello-chk
+
+  server backend-apps-{{ it.name }} {{ it.router_internal_address}}:443 check
+
+{% endfor %}
+
+
+{% for it in ocp_networks %}
+backend bk_api-{{ it.name }}
+  mode tcp
+  balance roundrobin
+  # maximum SSL session ID length is 32 bytes.
+  stick-table type binary len 32 size 30k expire 30m
+  acl clienthello req_ssl_hello_type 1
+  acl serverhello rep_ssl_hello_type 2
+  # use tcp content accepts to detects ssl client and server hello.
+  tcp-request inspect-delay 5s
+  tcp-request content accept if clienthello
+  # no timeout on response inspect delay by default.
+  tcp-response content accept if serverhello
+  stick on payload_lv(43,1) if clienthello
+  # Learn on response if server hello.
+  stick store-response payload_lv(43,1) if serverhello
+  option ssl-hello-chk
+
+  server backend-api-{{ it.name }} {{ it.api_internal_address}}:6443 check
+
+{% endfor %}
+
+# Sorry backend which should invite the user to update its client
+backend bk_ssl_default
+  mode tcp
+  balance roundrobin
+
+  # maximum SSL session ID length is 32 bytes.
+  stick-table type binary len 32 size 30k expire 30m
+  acl clienthello req_ssl_hello_type 1
+  acl serverhello rep_ssl_hello_type 2
+  # use tcp content accepts to detects ssl client and server hello.
+  tcp-request inspect-delay 5s
+  tcp-request content accept if clienthello
+  # no timeout on response inspect delay by default.
+  tcp-response content accept if serverhello
+  stick on payload_lv(43,1) if clienthello
+  # Learn on response if server hello.
+  stick store-response payload_lv(43,1) if serverhello
+  option ssl-hello-chk
+  server server1 localhost:443 check
+
+listen stats # Define a listen section called "stats"
+  bind :8404 # Listen on localhost:9000
+  mode http
+  stats enable  # Enable stats page
+  stats hide-version  # Hide HAProxy version
+  stats realm Haproxy\ Statistics  # Title text for popup window
+  stats uri /haproxy_stats  # Stats URI

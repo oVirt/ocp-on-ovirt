@@ -1,0 +1,32 @@
+---
+# defaults file for ocp-rhv-proxy-vm
+external_address: 169.63.244.92
+external_netmask: 169.63.244.240
+external_gateway: 169.63.244.81
+
+external_nic: eth4
+
+ocp_networks:
+- nic: eth1
+  name: net-10
+  dhcp_range: 192.168.210.101,192.168.210.150,5m
+  dns: 8.8.8.8
+  address: 192.168.210.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.210.32
+  api_internal_address: 192.168.210.30
+  api_fqdn: api.ovirt10.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt10.gcp.devcluster.openshift.com
+- nic: eth2
+  name: net-11
+  dhcp_range: 192.168.211.101,192.168.211.150,5m
+  dns: 8.8.8.8
+  address: 192.168.211.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.211.32
+  api_internal_address: 192.168.211.30
+  api_fqdn: api.ovirt11.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt11.gcp.devcluster.openshift.com
+
+
+

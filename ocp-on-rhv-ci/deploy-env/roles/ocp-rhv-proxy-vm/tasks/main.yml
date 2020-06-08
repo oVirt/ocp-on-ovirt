@@ -1,0 +1,161 @@
+---
+# tasks file for ocp-rhv-proxy-vm
+- name: remove cloud-init package
+  yum:
+    name: cloud-init
+    state: absent
+    autoremove: true
+
+- name: install req packages
+  yum:
+    state: present
+    name:
+      - dnsmasq
+      - firewalld
+      - haproxy
+      - mod_ssl
+      - openssl
+      - httpd
+
+- name: debug print ocp_networks
+  debug: msg="{{ocp_networks}}"
+
+- name: create external nic
+  copy:
+    dest: "/etc/sysconfig/network-scripts/ifcfg-{{item.external_nic}}"
+    content: |
+      BOOTPROTO=none
+      DEVICE={{item.external_nic}}
+      ONBOOT=yes
+      TYPE=Ethernet
+      USERCTL=no
+      IPADDR={{item.external_address}}
+      NETMASK={{item.external_netmask}}
+      NM_CONTROLLED=no
+
+- name: create internal nics
+  copy:
+    dest: "/etc/sysconfig/network-scripts/ifcfg-{{item.nic}}"
+    content: |
+      BOOTPROTO=none
+      DEVICE={{item.nic}}
+      ONBOOT=yes
+      TYPE=Ethernet
+      USERCTL=no
+      IPADDR={{item.address}}
+      NETMASK={{item.netmask}}
+      NM_CONTROLLED=no
+  with_items: "{{ocp_networks}}"
+
+- name: check if nic can be brought up using ifup
+  command: "ifup {{item.nic}}"
+  with_items: "{{ocp_networks}}"
+
+- name: create /var/run/dnsmasq
+  file:
+    path: /var/run/dnsmasq
+    state: directory
+
+- name: create /var/lib/dnsmasq
+  file:
+    path: /var/lib/dnsmasq
+    state: directory
+
+- name: create dnsmasq service file
+  copy:
+    dest: /usr/lib/systemd/system/dnsmasq@.service
+    content: |
+      [Unit]
+      Description=DHCP and DNS caching server for %i.
+      After=network.target
+
+      [Service]
+      ExecStart=/usr/sbin/dnsmasq -k --conf-file=/var/lib/dnsmasq/dnsmasq-%i.conf
+      ExecReload=/bin/kill -HUP
+      Restart=on-failure
+      RestartSec=5
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: create dnsmasq configuration for network
+  copy:
+    dest: "/var/lib/dnsmasq/dnsmasq-{{item.name}}.conf"
+    content: |
+      strict-order
+      pid-file=/var/run/dnsmasq/{{item.name}}.pid
+      except-interface=lo
+      bind-dynamic
+      interface={{item.nic}}
+      dhcp-range={{item.dhcp_range}}
+      dhcp-no-override
+      dhcp-authoritative
+      log-queries
+      dhcp-option=3,{{item.address}}
+      local={{item.dns}}
+      domain=gcp.devcluster.openshift.com
+      dhcp-leasefile=/var/lib/dnsmasq/{{item.name}}.leases
+  with_items: "{{ocp_networks}}"
+
+- name: check dnsmasq configuration syntax
+  command: /usr/sbin/dnsmasq -k --conf-file=/var/lib/dnsmasq/dnsmasq-{{item.name}}.conf --test
+  with_items: "{{ocp_networks}}"
+  register: command_result
+  failed_when: "'syntax check OK' not in command_result.stderr"
+
+- name: start/enable dnsmasq service for network
+  systemd:
+    name: "dnsmasq@{{item.name}}.service"
+    state: started
+    enabled: true
+  with_items: "{{ocp_networks}}"
+
+
+- name: firewalld configuration
+  block:
+    - firewalld:
+        masquerade: yes
+        state: enabled
+        permanent: yes
+        zone: public
+
+    - firewalld:
+        zone: public
+        service: "{{item}}"
+        permanent: yes
+        state: enabled
+      with_items:
+        - ssh
+        - dhcp
+        - dns
+        - dhcpv6-client
+
+    - firewalld:
+        zone: public
+        port: "{{item}}"
+        permanent: yes
+        state: enabled
+      with_items:
+        - 8404/tcp
+        - 6443/tcp
+
+
+- name: create haproxy configuration
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+
+- name: Disable SELinux at next reboot
+  selinux:
+    state: disabled
+
+- name: Set SELinux in permissive mode until the machine is rebooted
+  command: setenforce 0
+  ignore_errors: true
+  changed_when: false
+
+- name: start/enable haproxy service
+  systemd:
+    name: "haproxy.service"
+    state: started
+    enabled: true
