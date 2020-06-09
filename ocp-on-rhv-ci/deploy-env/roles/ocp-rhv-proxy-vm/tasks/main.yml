@@ -191,3 +191,9 @@
     name: "haproxy.service"
     state: started
     enabled: true
+
+- name: start/enable firewalld service
+  systemd:
+    name: "firewalld.service"
+    state: started
+    enabled: true
