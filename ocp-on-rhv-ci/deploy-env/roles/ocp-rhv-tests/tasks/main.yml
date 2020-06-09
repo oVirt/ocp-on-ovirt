@@ -11,7 +11,7 @@
     state: running
     nics:
       - name: eth0
-        profile_name: ovn-vmnet-10
+        profile_name: ovn-vmnet-18
 
     cloud_init:
       authorized_ssh_keys: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
