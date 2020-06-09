@@ -44,6 +44,13 @@
   with_items: "{{ocp_networks}}"
   delegate_to: localhost
 
+- name: Add a host alias that we reach through a tunnel (Ansible 1.9 and older)
+  add_host:
+    hostname: '{{ external_hostname }}'
+    name: proxy-vm
+    ansible_ssh_host: '{{ external_hostname }}'
+    ansible_ssh_user: root
+
 - name: install req packages
   yum:
     state: present

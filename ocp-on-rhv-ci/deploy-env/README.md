@@ -6,7 +6,12 @@
     export OVIRT_ENGINE_URL=https://engine-fqdn/ovirt-engine/api
   ```
 
-- running  deployment
+- running full  deployment
   ```bash
   ansible-playbook ocp_on_rhv-deploy.yml
+  ```
+
+- running proxy-vm provision only
+  ```bash
+  ansible-playbook ocp_on_rhv-deploy.yml -t proxy-vm
   ```
