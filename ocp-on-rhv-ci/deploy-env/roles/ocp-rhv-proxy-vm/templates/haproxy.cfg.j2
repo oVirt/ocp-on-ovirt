@@ -78,7 +78,6 @@ backend bk_apps-{{ it.name }}
   # Learn on response if server hello.
   stick store-response payload_lv(43,1) if serverhello
   option ssl-hello-chk
-
   server backend-apps-{{ it.name }} {{ it.router_internal_address}}:443 check
 
 {% endfor %}
@@ -101,7 +100,6 @@ backend bk_api-{{ it.name }}
   # Learn on response if server hello.
   stick store-response payload_lv(43,1) if serverhello
   option ssl-hello-chk
-
   server backend-api-{{ it.name }} {{ it.api_internal_address}}:6443 check
 
 {% endfor %}

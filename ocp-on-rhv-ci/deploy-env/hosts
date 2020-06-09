@@ -1,2 +1,1 @@
-[proxy-vm]
-ovirt-proxy-vm.rhv44.gcp.devcluster.openshift.com ansible_ssh_user=centos
+proxy-vm ansible_host=ovirt-proxy-vm.rhv44.gcp.devcluster.openshift.com ansible_ssh_user=root

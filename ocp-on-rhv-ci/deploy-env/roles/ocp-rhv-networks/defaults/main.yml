@@ -1,13 +1,9 @@
 ---
 # defaults file for ocp-rhv-networks
 data_center_name: dc-43
-cluster_name: cluster-ovn
 cluster_description: Default Cluster
 ocp_network_prefix: "ovn-vmnet"
 ocp_network_count: 11
 ocp_network_start: 10
-ovirt_engine_url: "{{ lookup('env','OVIRT_ENGINE_URL') }}"
-ovirt_engine_username: "{{ lookup('env','OVIRT_ENGINE_USERNAME') }}"
-ovirt_engine_password: "{{ lookup('env','OVIRT_ENGINE_PASSWORD') }}"
 keyston_api: "https://{{ ovirt_engine_url | urlsplit('hostname') }}:35357/v2.0"
 neutron_api: "https://{{ ovirt_engine_url | urlsplit('hostname') }}:9696/v2.0"

@@ -4,8 +4,23 @@
     hosts: localhost
     connection: local
 
-    tasks:
-    # create oVirt OVN networks for running OCP VMs.
-      - import_role:
-          name: ocp-rhv-networks
+    vars:
+      ovirt_engine_url: "{{ lookup('env','OVIRT_ENGINE_URL') }}"
+      ovirt_engine_username: "{{ lookup('env','OVIRT_ENGINE_USERNAME') }}"
+      ovirt_engine_password: "{{ lookup('env','OVIRT_ENGINE_PASSWORD') }}"
+      cluster_name: cluster-ovn
+
+    pre_tasks:
+      - name: login to ovirt
+        import_tasks: login_to_ovirt.yml
+        tags: always
+
+    roles:
+    #create oVirt OVN networks for running OCP VMs.
+      - name: ocp-rhv-networks
         tags: networks
+
+      - name: ocp-rhv-proxy-vm
+        tags: proxy-vm
+        delegate_to: proxy-vm
+

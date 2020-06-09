@@ -1,8 +1,5 @@
 ---
-
-- include_tasks: login_to_ovirt.yml
-
-#create ovn network using ovirt_network (ovirtsdk4)
+#create ovn internal networks using ovirt_network (ovirtsdk4)
 - ovirt_network:
     data_center: "{{data_center_name}}"
     name: "{{item}}"

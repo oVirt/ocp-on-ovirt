@@ -1,10 +1,11 @@
 ---
 # defaults file for ocp-rhv-proxy-vm
 external_address: 169.63.244.92
-external_netmask: 169.63.244.240
+external_netmask: 255.255.255.240
 external_gateway: 169.63.244.81
-
-external_nic: eth4
+external_hostname: ovirt-proxy-vm.rhv44.gcp.devcluster.openshift.com
+root_password: qum5net
+external_nic: eth0
 
 ocp_networks:
 - nic: eth1

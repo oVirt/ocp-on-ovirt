@@ -1,10 +1,48 @@
 ---
-# tasks file for ocp-rhv-proxy-vm
-- name: remove cloud-init package
-  yum:
-    name: cloud-init
-    state: absent
-    autoremove: true
+
+- name: provision VM with cloud init
+  ovirt_vm:
+    name: proxy-vm
+    template: centos-7
+    cluster: "{{cluster_name}}"
+    auth: "{{ovirt_auth}}"
+    memory: 2GiB
+    state: running
+    high_availability: true
+    high_availability_priority: 50
+    nics:
+      - name: eth0
+        profile_name: ovn-test
+
+    cloud_init:
+      nic_boot_protocol: static
+      nic_ip_address: "{{external_address}}"
+      nic_netmask: "{{external_netmask}}"
+      authorized_ssh_keys: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+      nic_gateway: "{{external_gateway}}"
+      nic_name: eth0
+      dns_servers: 8.8.8.8
+      custom_script: |
+        write_files:
+         - content: |
+             nameserver 8.8.8.8
+           path: /etc/resolv.conf
+           permissions: '0622'
+      nic_on_boot: true
+      host_name: "{{external_hostname}}"
+      user_name: root
+      root_password: "{{root_password}}"
+  delegate_to: localhost
+
+- name: attach nics to the vm
+  ovirt_nic:
+    state: present
+    auth: "{{ovirt_auth}}"
+    vm: proxy-vm
+    name: "{{item.nic}}"
+    network: "ovn-vm{{item.name}}"
+  with_items: "{{ocp_networks}}"
+  delegate_to: localhost
 
 - name: install req packages
   yum:
@@ -19,19 +57,6 @@
 
 - name: debug print ocp_networks
   debug: msg="{{ocp_networks}}"
-
-- name: create external nic
-  copy:
-    dest: "/etc/sysconfig/network-scripts/ifcfg-{{item.external_nic}}"
-    content: |
-      BOOTPROTO=none
-      DEVICE={{item.external_nic}}
-      ONBOOT=yes
-      TYPE=Ethernet
-      USERCTL=no
-      IPADDR={{item.external_address}}
-      NETMASK={{item.external_netmask}}
-      NM_CONTROLLED=no
 
 - name: create internal nics
   copy:
