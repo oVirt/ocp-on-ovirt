@@ -49,3 +49,9 @@
 - import_tasks: test_vm_checks.yml
   delegate_to: test-vm
 
+- name: remove test vm
+  ovirt_vm:
+    name: test-vm
+    state: absent
+    auth: '{{ ovirt_auth }}'
+
