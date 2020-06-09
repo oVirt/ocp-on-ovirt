@@ -1,0 +1,12 @@
+---
+
+- ping:
+
+- name: test communication to openshift CI
+  uri:
+    url: https://api.ci.openshift.org/
+    return_content: yes
+  register: openshift_page
+
+- debug: msg="{{ openshift_page }}"
+

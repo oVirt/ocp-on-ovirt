@@ -1,0 +1,51 @@
+---
+# tasks file for ocp-rhv-tests
+
+- name: provision test VM with cloud init
+  ovirt_vm:
+    name: test-vm
+    template: centos-7
+    cluster: "{{cluster_name}}"
+    auth: "{{ovirt_auth}}"
+    memory: 1GiB
+    state: running
+    nics:
+      - name: eth0
+        profile_name: ovn-vmnet-10
+
+    cloud_init:
+      authorized_ssh_keys: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+      nic_name: eth0
+      dns_servers: 8.8.8.8
+      nic_boot_protocol: dhcp
+      nic_on_boot: true
+      user_name: root
+      root_password: "{{root_password}}"
+
+
+- name: wait until IP is reported to the engine
+  ovirt_vm_facts:
+    auth: '{{ ovirt_auth }}'
+    pattern: 'name=test-vm'
+    fetch_nested: true
+    nested_attributes: ips
+  #no_log: true
+  register: vm_facts
+  until: vm_facts.ansible_facts.ovirt_vms[0]['reported_devices'] | list | length > 0
+  retries: 5
+  delay: 60
+
+- debug: msg="{{ vm_facts.ansible_facts.ovirt_vms[0]['reported_devices'] }}"
+- set_fact: test_vm_ip="{{ vm_facts.ansible_facts.ovirt_vms[0]['reported_devices'][0]['ips'] |  selectattr("version", "equalto", "v4") | map(attribute='address') | list | first }}"
+- debug: msg="{{ test_vm_ip }}"
+
+- name: Add a host alias that we reach through a tunnel
+  add_host:
+    hostname: '{{ test_vm_ip }}'
+    name: test-vm
+    ansible_ssh_host: '{{ test_vm_ip }}'
+    ansible_ssh_user: root
+
+- import_tasks: test_vm_checks.yml
+  delegate_to: test-vm
+

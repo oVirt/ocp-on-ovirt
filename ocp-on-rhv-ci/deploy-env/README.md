@@ -15,3 +15,8 @@
   ```bash
   ansible-playbook ocp_on_rhv-deploy.yml -t proxy-vm
   ```
+
+- running environment tests
+  ```bash
+  ansible-playbook ocp_on_rhv-deploy.yml -t ovirt-ocp-tests
+  ```
