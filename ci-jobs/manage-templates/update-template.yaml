@@ -1,0 +1,32 @@
+---
+- debug:
+    msg: "uploading template {{ item.template_name }}"
+- name: Login to oVirt
+  ovirt_auth:
+    url: "{{ engine_url }}"
+    username: "{{ engine_user }}"
+    password: "{{ engine_password }}"
+    ca_file: "{{ engine_cafile }}"
+    insecure: "{{ engine_insecure }}"
+  when: ovirt_auth is undefined or not ovirt_auth
+  register: loggedin
+- name: find if template exist
+  ovirt_template_info:
+    auth: "{{ ovirt_auth }}"
+    pattern: "name={{ item.template_name }}"
+  register: template_info
+- name: delete the old template
+  ovirt_template:
+    auth: "{{ ovirt_auth }}"
+    state: absent
+    name: "{{ item.template_name }}"groups["GROUP_NAME"] (groups["GROUP_NAME"]|length>0)
+  when: "(template_info['ovirt_templates'] is defined) and ( template_info['ovirt_templates']|length>0 )"
+- name: upload new template
+  include_role:
+    name: ovirt.image-template
+  vars:
+    template_name: "{{ item.template_name }}"
+    template_cluster: "{{ item.template_cluster }}"
+    template_memory: "{{ item.template_memory }}"
+    template_cpu: "{{ item.template_cpu }}"
+    template_nics: "{{ item.template_nics }}"
