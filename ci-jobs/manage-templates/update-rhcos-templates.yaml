@@ -2,7 +2,7 @@
   gather_facts: no
   connection: local
   vars:
-    engine_url: https://localhost/ovirt-engine/api
+    engine_url: https://@@Engine_FQDN@@/ovirt-engine/api
     engine_user: admin@internal
     engine_password: @@ADD PASSWORD@@
     engine_cafile: /etc/pki/ovirt-engine/ca.pem

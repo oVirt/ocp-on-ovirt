@@ -19,7 +19,7 @@
   ovirt_template:
     auth: "{{ ovirt_auth }}"
     state: absent
-    name: "{{ item.template_name }}"groups["GROUP_NAME"] (groups["GROUP_NAME"]|length>0)
+    name: "{{ item.template_name }}"
   when: "(template_info['ovirt_templates'] is defined) and ( template_info['ovirt_templates']|length>0 )"
 - name: upload new template
   include_role:
