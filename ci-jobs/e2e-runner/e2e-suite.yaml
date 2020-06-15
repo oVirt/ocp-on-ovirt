@@ -251,10 +251,10 @@ spec:
 
           cat /tmp/shared/artifacts/installer/install-config.yaml
           cp "$(command -v openshift-install)" /tmp/shared/
-          sleep 30m
           #Done with configuration we can install now
 
           TF_LOG=debug openshift-install --dir=/tmp/shared/artifacts/installer create ignition-configs --log-level=debug
+          echo "done with ignition-configs"
 
           python -c \
               'import json, sys; j = json.load(sys.stdin); j[u"systemd"][u"units"] = [{u"contents": "[Unit]\nDescription=Mount etcd as a ramdisk\nBefore=local-fs.target\n[Mount]\n What=none\nWhere=/var/lib/etcd\nType=tmpfs\nOptions=size=2G\n[Install]\nWantedBy=local-fs.target", u"enabled": True, u"name":u"var-lib-etcd.mount"}]; json.dump(j, sys.stdout)' \
