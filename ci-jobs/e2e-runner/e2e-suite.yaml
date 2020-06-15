@@ -105,8 +105,8 @@ spec:
             OVIRT_DNSVIP="192.168.218.31"
             OVIRT_INGRESSVIP="192.168.218.32"
             OCP_CLUSTER="ovirt18"
-            OVIRT_ENGINE_CLUSTER_ID="a62b1b9c-881a-46b1-9a39-8ea4c89384ca"
-            OVIRT_ENGINE_TEMPLATE_NAME="rhcos-master-18"
+            OVIRT_ENGINE_CLUSTER_ID="8c93d26d-802b-4214-a9f5-58267dab3419"
+            OVIRT_ENGINE_TEMPLATE_NAME="rhcos-master-ovirt18"
             OVIRT_ENGINE_STORAGE_DOMAIN_ID="be98a22b-4634-4282-ad34-14ad15553835"
             OVIRT_ENGINE_URL="https://engine.rhv44.gcp.devcluster.openshift.com/ovirt-engine/api"
           EOF
@@ -309,6 +309,8 @@ spec:
           trap 'CHILDREN=$(jobs -p); if test -n "${CHILDREN}"; then kill ${CHILDREN} && wait; fi' TERM
 
           set -euo pipefail
+          set -x
+
           echo "waiting for installation to complete..."
           while true; do
             if [[ -f /tmp/shared/01_install.done ]]; then
@@ -324,7 +326,7 @@ spec:
           mkdir -p junit/
 
           function conformance-tests() {
-            openshift-tests run "openshift/conformance/parallel \
+            openshift-tests run openshift/conformance/parallel \
               --provider '{"type":"ovirt"}' -o run_conformance.log -junit-dir junit/
           }
 
@@ -345,7 +347,8 @@ spec:
           source /etc/openshift-installer/ovirt.conf
           source /tmp/shared/ovirt-lease.conf
           curl -k --connect-timeout 2 --retry 30 --retry-delay 30 https://api.${OCP_CLUSTER}.gcp.devcluster.openshift.com:6443/apis/config.openshift.io/v1/infrastructures/cluster
-          ${TEST_COMMAND}
+
+          $(${TEST_COMMAND})
 
           if [ "$EXIT_ON_FINISH" == "false" ]; then
             sleep 360m
@@ -361,8 +364,7 @@ spec:
           openshift-install --dir /tmp/shared/artifacts/installer destroy cluster
           # Clean up
           rm -f /tmp/shared/artifacts/installer/ovirt-config.yaml
-
-
+          exit 0
       volumes:
         - name: config-gcp-secrets
           secret:
