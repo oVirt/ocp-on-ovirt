@@ -160,6 +160,7 @@
         - ssh
         - dhcp
         - dns
+        - https
         - dhcpv6-client
 
     - firewalld:
