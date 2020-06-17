@@ -291,7 +291,7 @@ spec:
           mountPath: /tmp/shared/artifacts
         env:
         - name: TEST_COMMAND
-          value: conformance-tests
+          value: TEST_SUITE=openshift/conformance/parallel conformance-tests
         - name: EXIT_ON_FINISH
           value: "false"
         resources:
@@ -348,7 +348,7 @@ spec:
           source /tmp/shared/ovirt-lease.conf
           curl -k --connect-timeout 2 --retry 30 --retry-delay 30 https://api.${OCP_CLUSTER}.gcp.devcluster.openshift.com:6443/apis/config.openshift.io/v1/infrastructures/cluster
 
-          $(${TEST_COMMAND})
+          ${TEST_COMMAND}
 
           if [ "$EXIT_ON_FINISH" == "false" ]; then
             sleep 360m

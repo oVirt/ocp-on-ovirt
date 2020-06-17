@@ -16,9 +16,6 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// Filter represents a function which accept a string as input and returns a filtered string
-type Filter func(string) string
-
 // PullRequestData holds all the data needed for a PR
 type PullRequestData struct {
 	org   string
@@ -75,7 +72,7 @@ func getGithubPrData(org string, repo string, id int) (*github.PullRequest, erro
 	return pr, err
 }
 
-func createPullRequestData(prURL string) (PullRequestData, error) {
+func createPullRequestData(prURL string) (*PullRequestData, error) {
 	org, repo, id, err := parsePrURL(prURL)
 	if err != nil {
 		return PullRequestData{}, err
@@ -84,7 +81,7 @@ func createPullRequestData(prURL string) (PullRequestData, error) {
 	if err != nil {
 		return PullRequestData{}, err
 	}
-	return PullRequestData{
+	return &PullRequestData{
 		org:   org,
 		repo:  repo,
 		id:    id,
@@ -159,7 +156,7 @@ func main() {
 	debug := flag.Bool("debug", false, "run with debug")
 	flag.Parse()
 	url := flag.Arg(0)
-	prd, err = createPullRequestData(url)
+	prd, err = *createPullRequestData(url)
 	if err != nil {
 		panic(err)
 	}

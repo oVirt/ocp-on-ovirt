@@ -30,3 +30,4 @@
     template_memory: "{{ item.template_memory }}"
     template_cpu: "{{ item.template_cpu }}"
     template_nics: "{{ item.template_nics }}"
+    template_operating_system: "rhcos_x64"
