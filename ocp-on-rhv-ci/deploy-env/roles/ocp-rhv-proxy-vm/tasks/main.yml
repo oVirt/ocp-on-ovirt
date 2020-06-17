@@ -10,6 +10,7 @@
     state: running
     high_availability: true
     high_availability_priority: 50
+    host: "{{host_running_proxy}}"
     nics:
       - name: eth0
         profile_name: ovn-test

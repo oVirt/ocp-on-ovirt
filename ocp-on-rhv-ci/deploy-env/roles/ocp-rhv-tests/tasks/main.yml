@@ -9,6 +9,7 @@
     auth: "{{ovirt_auth}}"
     memory: 1GiB
     state: running
+    host: baremetal01
     nics:
       - name: eth0
         profile_name: ovn-vmnet-18
