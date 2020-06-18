@@ -84,11 +84,6 @@
   command: "ifup {{item.nic}}"
   with_items: "{{ocp_networks}}"
 
-- name: create /var/run/dnsmasq
-  file:
-    path: /var/run/dnsmasq
-    state: directory
-
 - name: create /var/lib/dnsmasq
   file:
     path: /var/lib/dnsmasq
@@ -116,7 +111,7 @@
     dest: "/var/lib/dnsmasq/dnsmasq-{{item.name}}.conf"
     content: |
       strict-order
-      pid-file=/var/run/dnsmasq/{{item.name}}.pid
+      pid-file=/var/run/{{item.name}}.pid
       except-interface=lo
       bind-dynamic
       interface={{item.nic}}
