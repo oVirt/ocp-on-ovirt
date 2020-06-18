@@ -62,6 +62,9 @@
       - mod_ssl
       - openssl
       - httpd
+      - dialog
+      - wget
+      - tmux
 
 - name: debug print ocp_networks
   debug: msg="{{ocp_networks}}"
