@@ -7,6 +7,7 @@ external_hostname: ovirt-proxy-vm.rhv44.gcp.devcluster.openshift.com
 root_password: qum5net
 external_nic: eth0
 host_running_proxy: baremetal04
+template_name: centos-7
 
 ocp_networks:
 - nic: eth1

@@ -3,7 +3,7 @@
 - name: provision VM with cloud init
   ovirt_vm:
     name: proxy-vm
-    template: centos-7
+    template: "{{template_name}}"
     cluster: "{{cluster_name}}"
     auth: "{{ovirt_auth}}"
     memory: 2GiB
