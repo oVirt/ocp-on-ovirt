@@ -13,7 +13,7 @@
     host: "{{host_running_proxy}}"
     nics:
       - name: eth0
-        profile_name: ovn-test
+        profile_name: "{{mgmt_network}}"
 
     cloud_init:
       nic_boot_protocol: static
