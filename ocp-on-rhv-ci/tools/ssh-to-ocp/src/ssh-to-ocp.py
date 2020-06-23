@@ -10,6 +10,9 @@ from glob import glob
 # - support to run from mutilply users
 # - added dialog to select which cluster to connect to
 
+#ver 0.3 - eslutsky@redhat.com
+# - added vm count for each cluster
+
 LEASE_FILE="/var/lib/dnsmasq/net-1*.leases"
 SSH_OPTS="-oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
 SSH_USER="core"
@@ -24,7 +27,8 @@ class Leases(object):
     def get_dialog_options(self):
         lst = []
         for cnt,fpath in enumerate(self.leases):
-            lst.append('"%d" "cluster - ovirt-1%d"' % (cnt,cnt))
+            num_lines = sum(1 for line in open(fpath)
+            lst.append('"%d" "cluster - ovirt-1%d (%d running VMs)"' % (cnt,cnt,num_lines))
 
         return  " ".join(lst)
 
