@@ -1,0 +1,84 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    ovirt_engine_fqdn: "{{ lookup('env', 'OVIRT_ENGINE_FQDN') }}"
+    ovirt_engine_username: "{{ lookup('env', 'OVIRT_ENGINE_USERNAME') }}"
+    ovirt_engine_password: "{{ lookup('env', 'OVIRT_ENGINE_PASSWORD') }}"
+
+    ocp_admin_username: ocpadmin
+    ocp_admin_password: "{{ lookup('env', 'OCP_ADMIN_PASSWORD') }}"
+    ocp_admin_groupname: ocp-administrator
+
+    data_center_name: Default
+
+    users:
+      - name: "{{ ocp_admin_username }}"
+        state: present
+        authz_name: internal-authz
+        password: "{{ ocp_admin_password }}"
+        valid_to: "2030-01-01 00:00:00Z"
+
+    user_groups:
+      - name: "{{ ocp_admin_groupname }}"
+        state: present
+        authz_name: internal-authz
+        users:
+          - "{{ ocp_admin_username }}"
+
+    permissions:
+      - role: DiskOperator
+        group_name: ocp-administrator
+        authz_name: internal-authz
+        object_type: data_center
+        object_name: "{{ data_center_name }}"
+
+      - role: DiskCreator
+        group_name: ocp-administrator
+        authz_name: internal-authz
+        object_type: system
+        object_name: ""
+
+      - role: TemplateOwner
+        group_name: ocp-administrator
+        authz_name: internal-authz
+        object_type: data_center
+        object_name: "{{ data_center_name }}"
+
+      - role: TemplateCreator
+        group_name: ocp-administrator
+        authz_name: internal-authz
+        object_type: data_center
+        object_name: "{{ data_center_name }}"
+
+      - role: UserTemplateBasedVm
+        group_name: ocp-administrator
+        authz_name: internal-authz
+        object_type: data_center
+        object_name: "{{ data_center_name }}"
+
+      - role: ClusterAdmin
+        group_name: ocp-administrator
+        authz_name: internal-authz
+        object_type: data_center
+        object_name: "{{ data_center_name }}"
+
+      - role: TagManager
+        group_name: ocp-administrator
+        authz_name: internal-authz
+        object_type: system
+        object_name: ""
+
+  pre_tasks:
+    - name: Login to oVirt
+      ovirt_auth:
+        hostname: "{{ ovirt_engine_fqdn }}"
+        username: "{{ ovirt_engine_username }}"
+        password: "{{ ovirt_engine_password }}"
+        insecure: True
+
+  roles:
+    - ovirt.infra/roles/ovirt.aaa-jdbc
+    - ovirt.infra/roles/ovirt.permissions
