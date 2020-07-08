@@ -1,8 +1,10 @@
 package ovirtci
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	ovirtsdk4 "github.com/oVirt/go-ovirt"
@@ -65,6 +67,68 @@ func (e *Engine) SetOvirtInfo() {
 	log.Infof("%10s %v", "vms:", api.MustSummary().MustVms().MustTotal())
 	e.version = api.MustProductInfo().MustVersion().MustFullVersion()
 }
+
+//GetLastPRForCluster - returns the last PR URL for the given cluster
+func (e *Engine) GetLastPRForCluster(cluster string) string {
+	eventsService := e.conn.SystemService().EventsService()
+	var data map[string]interface{}
+
+	allevents := eventsService.List().Search("origin=openshift-ci").MustSend()
+	for _, event := range allevents.MustEvents().Slice() {
+		fdata := strings.Split(event.MustDescription(), ";")
+		if len(fdata) > 2 {
+			json.Unmarshal([]byte(fdata[2]), &data)
+			clusterid := strings.TrimSpace(fdata[3])
+			prLink := data["refs"].(map[string]interface{})["pulls"].([]interface{})[0].(map[string]interface{})["link"]
+
+			if clusterid == cluster {
+				return fmt.Sprintf("%v", prLink)
+			}
+
+		}
+	}
+	return ""
+}
+
+func (e *Engine) ListEvents() {
+	eventsService := e.conn.SystemService().EventsService()
+
+	var data map[string]interface{}
+
+	events := eventsService.List().Search("origin=openshift-ci").MustSend()
+	for _, event := range events.MustEvents().Slice() {
+		fdata := strings.Split(event.MustDescription(), ";")
+		if len(fdata) > 2 {
+			json.Unmarshal([]byte(fdata[2]), &data)
+			fmt.Printf("%s - cluster:%s \n", data["refs"].(map[string]interface{})["pulls"].([]interface{})[0].(map[string]interface{})["link"], fdata[3])
+		}
+	}
+}
+
+func (e *Engine) AddComment(vmname string, comment string) {
+
+	// Get the reference to the "vms" service:
+	vmsService := e.conn.SystemService().VmsService()
+	ovirtsdk4.NewVmBuilder().Comment("test").MustBuild()
+	// Retrieve the description of the virtual machine:
+	vmsResp, err := vmsService.List().Search(fmt.Sprintf("name=%s", vmname)).Send()
+	if err != nil {
+		fmt.Printf("Failed to get vm list, reason: %v\n", err)
+		return
+	}
+	vm := vmsResp.MustVms().Slice()[0]
+
+	//In order to update the virtual machine we need a reference to the service
+	// the manages it:
+	vmService := vmsService.VmService(vm.MustId())
+	vmService.Update().
+		Vm(
+			ovirtsdk4.NewVmBuilder().
+				Comment(comment).
+				MustBuild()).
+		Send()
+
+}
 func (e *Engine) ListVMs() map[string]string {
 	// Get the reference to the "vms" service:
 	vmsService := e.conn.SystemService().VmsService()
@@ -84,7 +148,7 @@ func (e *Engine) ListVMs() map[string]string {
 			fmt.Print("VM: (")
 			if vmName, ok := vm.Name(); ok {
 				fmt.Printf(" name: %v", vmName)
-				vmSlice[vmName] = "Found"
+				vmSlice[vmName], _ = vm.Comment()
 			}
 			if vmID, ok := vm.Id(); ok {
 				fmt.Printf(" id: %v", vmID)
