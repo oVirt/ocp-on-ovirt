@@ -77,8 +77,9 @@ func (e *Engine) GetLastPRForCluster(cluster string) string {
 	for _, event := range allevents.MustEvents().Slice() {
 		fdata := strings.Split(event.MustDescription(), ";")
 		if len(fdata) > 2 {
-			json.Unmarshal([]byte(fdata[2]), &data)
-			clusterid := strings.TrimSpace(fdata[3])
+			json.Unmarshal([]byte(fdata[3]), &data)
+			clusterStatus := strings.TrimSpace(fdata[2])
+			clusterid := strings.TrimSpace(fdata[1])
 			prLink := data["refs"].(map[string]interface{})["pulls"].([]interface{})[0].(map[string]interface{})["link"]
 
 			if clusterid == cluster {
