@@ -1,2 +1,2 @@
 # ocp-ci-tools
-this repo contains all the tools and automations for ocp-on-rhv CI.
+This repo contains all the engineering tools and useful bits related to ocp-on-rhv.
