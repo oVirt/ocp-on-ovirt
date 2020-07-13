@@ -1,0 +1,7 @@
+Users can override the release image by exporting the `OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE` variable before launching the openshift installation.
+This is script will automatically grab the latest image for the specificed release via OPENSHIFT_RELEASE_VERSION.
+
+```
+$ git clone https://github.com/openshift/installer && cd installer
+$ ./build.sh
+```
