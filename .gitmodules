@@ -1,0 +1,3 @@
+[submodule "ovirt-sdk-go-examples/go-ovirt"]
+	path = ovirt-sdk-go-examples/go-ovirt
+	url = git@github.com:oVirt/go-ovirt.git
