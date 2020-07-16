@@ -1,8 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from os import system,environ,path
 from glob import glob
-
+import subprocess,os,sys,argparse
+import shutil
+import tempfile
 #change.log
 # ocp-on-rhv cluster vm ssh tool
 
@@ -13,16 +15,55 @@ from glob import glob
 #ver 0.3 - eslutsky@redhat.com
 # - added vm count for each cluster
 
+#ver 0.4 - eslutsky@redhat.com
+# - added proxy mode, run tmux locally throught proxyvm - requires local tmux installed
+
+
 LEASE_FILE="/var/lib/dnsmasq/net-1*.leases"
+#LEASE_FILE="tmp/dnsmasq/net-1*.leases"
 SSH_OPTS="-oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
+
+#SSH_OPTS="-Fssh.cfg"
 SSH_USER="core"
 SSH_KEY="~/id_rsa"
 TMUX_SESSION_NAME="ocp-on-rhv VMs"
 
+def run(cmd):
+    result=subprocess.run(cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+        )
+
+    if result.returncode != 0:
+        raise ValueError(result.stderr)
+
+
+class ProxyVM(object):
+    def __init__(self,proxy_address):
+        self.proxy_address=proxy_address
+        self.test_connection()
+    
+    def test_connection(self):
+        run(["ssh",SSH_OPTS,self.proxy_address,"id"])
+    
+    def get_leases(self,remote_path,local_path):
+        run(["scp",SSH_OPTS,
+        "%s:%s" % (self.proxy_address,remote_path),
+        local_path
+        ])
+        pass
+
+
+        #output = result.stdout.decode('ascii')
+                
+
+
+
+
 class Leases(object):
     def __init__(self):
         self.leases=[]
-        self.get_lease_files()
+        #self.get_lease_files()
 
     def get_dialog_options(self):
         lst = []
@@ -35,8 +76,8 @@ class Leases(object):
     def get_file_by_id(self,id):
         return self.leases[id]
 
-    def get_lease_files(self):
-         self.leases=glob("%s*" % LEASE_FILE)
+    def get_lease_files(self,lease_file):
+         self.leases=glob("%s*" % lease_file)
 
 def get_dialog_options():
     return LEASES.get_dialog_options()
@@ -66,7 +107,7 @@ def open_dialog():
             %s 2>&1 1>&3);
     echo $result > ~/result
     """ % get_dialog_options()
-    print "running " + cmd_line
+    print ("running " + cmd_line)
     system(cmd_line)
 
     return open( path.expanduser("~/result")).read()
@@ -74,7 +115,7 @@ def open_dialog():
 def run_tmux(cmd="",window_name=""):
 
     cmd_line = "tmux new-window -t \"%s\" -n %s \"%s\"" % (TMUX_SESSION_NAME,window_name,cmd)
-    print cmd_line
+    print (cmd_line)
     system(cmd_line)
 
 def get_ssh(vm_address):
@@ -103,13 +144,54 @@ def lease_parser(file_name):
             #print data.split("\n")
 
 LEASES = Leases()
-
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='ocp-on-rhv cluster ssh tool')
+    parser.add_argument('-p', dest='proxy_address', default="",help="Proxy address")
+    parser.add_argument('-s', dest='ssh_config_file', default="ssh.cfg",help="ssh config file")
+    results = parser.parse_args()
+    tmpdir=""
+
+    
+
+    if results.proxy_address:
+
+        SSH_OPTS="-F%s" % results.ssh_config_file
+        #try to connect to the proxy VM
+        proxy = ProxyVM(results.proxy_address)
+
+        tmpdir=tempfile.mkdtemp()
+        try:
+            print("Creating temp %s dir" % tmpdir)
+            proxy.get_leases("%s"%LEASE_FILE,tmpdir)
+            LEASES.get_lease_files("%s/net-1*.leases" % tmpdir)
+        except:
+            shutil.rmtree(tmpdir)
+            raise
+
+    else:
+        LEASES.get_lease_files(LEASE_FILE)
+        
+
     while [ True ] :
+        if results.proxy_address:
+            proxy.get_leases("%s"%LEASE_FILE,tmpdir)
+            LEASES.get_lease_files("%s/net-1*.leases" % tmpdir)
+        else:
+            LEASES.get_lease_files(LEASE_FILE)
+         
+
         lease_id = open_dialog()
 
         kill_session()
         new_session()
+
+        if lease_id == "\n":
+            if tmpdir:
+                print("Removing temp %s dir" % tmpdir)
+                shutil.rmtree(tmpdir)
+            sys.exit(0)
+
+        
         for x in lease_parser( get_file_by_id(lease_id)  ):
             cmd=get_ssh(x['ipaddress'])
             run_tmux(cmd,x['vmname'])
