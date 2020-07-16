@@ -27,7 +27,7 @@ class Leases(object):
     def get_dialog_options(self):
         lst = []
         for cnt,fpath in enumerate(self.leases):
-            num_lines = sum(1 for line in open(fpath)
+            num_lines = sum(1 for line in open(fpath))
             lst.append('"%d" "cluster - ovirt-1%d (%d running VMs)"' % (cnt,cnt,num_lines))
 
         return  " ".join(lst)
