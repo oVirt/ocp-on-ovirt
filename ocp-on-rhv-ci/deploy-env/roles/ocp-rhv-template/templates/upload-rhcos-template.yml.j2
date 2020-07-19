@@ -1,0 +1,61 @@
+- hosts: localhost
+  gather_facts: no
+  connection: local
+
+  vars:
+    installer: /bin/openshift-install
+    engine_url: https://localhost/ovirt-engine/api
+    engine_user: admin@internal
+    engine_password: 123456
+    engine_cafile: /etc/pki/ovirt-engine/ca.pem
+    engine_insecure: true
+    template_cluster: {{cluster_name}}
+    template_name: rhcos-master
+    template_memory: 4GiB
+    template_operating_system: rhcos_x64
+    template_cpu: 2
+    template_disk_size: 30GiB
+    template_disk_storage: {{storage_name}}}
+    template_nics:
+      - name: nic1
+        profile_name: {{ocp_network_profile}}
+
+    template_seal: false
+    template_timeout: 600
+    image_download_timeout: 600
+    qcow_path: /var/tmp/rhcos.qcow2
+    image_path: /var/tmp
+    qcow_url: file:///var/tmp/rhcos.qcow2
+
+{% raw %}
+  pre_tasks:
+    - name: check if file exists
+      stat: path="{{ qcow_path }}"
+      register: st
+
+    - name: download rhcos image if missing
+      block:
+        - name: extract the rhcos url from meta
+          uri:
+            url: "https://raw.githubusercontent.com/openshift/installer/master/data/data/rhcos.json"
+          register: result
+
+        - name: extract the openstack image
+          set_fact:
+            qcow_url_compressed: "{{ result.json.baseURI + result.json.images.openstack.path }}"
+
+        - name: download file {{ qcow_path }}.gz
+          command: "curl --compressed -J -L -o {{ qcow_path }}.gz  {{ qcow_url_compressed }}"
+          register: download
+
+        - name: uncompress file {{ qcow_path }}.gz
+          command: "gunzip {{ qcow_path }}.gz"
+      when: st.stat.exists == False
+
+
+
+{% endraw %}
+
+  roles:
+    - oVirt.image-template
+

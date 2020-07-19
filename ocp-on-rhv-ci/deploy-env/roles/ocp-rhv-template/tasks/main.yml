@@ -1,0 +1,10 @@
+---
+# tasks file for ocp-rhv-template
+- name: create yaml file for rhcos upload
+  template:
+    src: upload-rhcos-template.yml.j2
+    dest: /root/upload-rhcos-template.yml
+
+- name: upload rhcos image + create template
+  command: ansible-playbook /root/upload-rhcos-template.yml
+  register: stdout

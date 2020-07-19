@@ -15,6 +15,13 @@
         import_tasks: login_to_ovirt.yml
         tags: always
 
+      - name: Add the engine to inventory
+        add_host:
+          hostname: "{{ ovirt_engine_url | urlsplit('hostname') }}"
+          name: engine
+          ansible_ssh_host: '{{ engine_fqdn }}'
+          ansible_ssh_user: root
+
     roles:
     #create oVirt OVN networks for running OCP VMs.
       - name: ocp-rhv-networks
@@ -24,6 +31,11 @@
         tags: proxy-vm
         delegate_to: proxy-vm
 
+      - name: ocp-rhv-template
+        tags: rhcos-template
+        delegate_to: engine
+
       - name: ocp-rhv-tests
         tags: ovirt-ocp-tests
+
 
