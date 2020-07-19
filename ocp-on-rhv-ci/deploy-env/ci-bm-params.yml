@@ -1,0 +1,8 @@
+---
+
+external_address: 169.63.244.92
+external_netmask: 255.255.255.240
+external_gateway: 169.63.244.81
+mgmt_boot_protocol: static
+external_hostname: ovirt-proxy-vm.rhv44.gcp.devcluster.openshift.com
+host_running_proxy: baremetal04

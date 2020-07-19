@@ -10,17 +10,17 @@
     state: running
     high_availability: true
     high_availability_priority: 50
-    host: "{{host_running_proxy}}"
+    host: "{{host_running_proxy | default(omit)}}"
     nics:
       - name: eth0
         profile_name: "{{mgmt_network}}"
 
     cloud_init:
-      nic_boot_protocol: static
-      nic_ip_address: "{{external_address}}"
-      nic_netmask: "{{external_netmask}}"
+      nic_boot_protocol: "{{mgmt_boot_protocol | default('dhcp')}}"
+      nic_ip_address: "{{external_address | default(omit) }}"
+      nic_netmask: "{{external_netmask | default(omit)}}"
       authorized_ssh_keys: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
-      nic_gateway: "{{external_gateway}}"
+      nic_gateway: "{{external_gateway | default(omit)}}"
       nic_name: eth0
       dns_servers: 8.8.8.8
       custom_script: |
@@ -30,7 +30,7 @@
            path: /etc/resolv.conf
            permissions: '0622'
       nic_on_boot: true
-      host_name: "{{external_hostname}}"
+      host_name: "{{external_hostname | default(omit)}}"
       user_name: root
       root_password: "{{root_password}}"
   delegate_to: localhost
@@ -124,7 +124,7 @@
       log-queries
       dhcp-option=3,{{item.address}}
       local={{item.dns}}
-      domain=gcp.devcluster.openshift.com
+      domain={{base_domain}}
       dhcp-leasefile=/var/lib/dnsmasq/{{item.name}}.leases
   with_items: "{{ocp_networks}}"
 
