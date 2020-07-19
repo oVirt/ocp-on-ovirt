@@ -25,7 +25,7 @@ SSH_OPTS="-oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
 
 #SSH_OPTS="-Fssh.cfg"
 SSH_USER="core"
-SSH_KEY="~/id_rsa"
+SSH_KEY="~/ssh/id_rsa"
 TMUX_SESSION_NAME="ocp-on-rhv VMs"
 
 def run(cmd):
@@ -42,10 +42,10 @@ class ProxyVM(object):
     def __init__(self,proxy_address):
         self.proxy_address=proxy_address
         self.test_connection()
-    
+
     def test_connection(self):
         run(["ssh",SSH_OPTS,self.proxy_address,"id"])
-    
+
     def get_leases(self,remote_path,local_path):
         run(["scp",SSH_OPTS,
         "%s:%s" % (self.proxy_address,remote_path),
@@ -55,7 +55,7 @@ class ProxyVM(object):
 
 
         #output = result.stdout.decode('ascii')
-                
+
 
 
 
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     results = parser.parse_args()
     tmpdir=""
 
-    
+
 
     if results.proxy_address:
 
@@ -170,7 +170,6 @@ if __name__ == "__main__":
 
     else:
         LEASES.get_lease_files(LEASE_FILE)
-        
 
     while [ True ] :
         if results.proxy_address:
@@ -178,7 +177,7 @@ if __name__ == "__main__":
             LEASES.get_lease_files("%s/net-1*.leases" % tmpdir)
         else:
             LEASES.get_lease_files(LEASE_FILE)
-         
+
 
         lease_id = open_dialog()
 
@@ -191,7 +190,7 @@ if __name__ == "__main__":
                 shutil.rmtree(tmpdir)
             sys.exit(0)
 
-        
+
         for x in lease_parser( get_file_by_id(lease_id)  ):
             cmd=get_ssh(x['ipaddress'])
             run_tmux(cmd,x['vmname'])
