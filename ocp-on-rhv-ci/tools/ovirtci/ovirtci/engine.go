@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -73,22 +75,49 @@ func (e *Engine) GetLastPRForCluster(cluster string) string {
 	eventsService := e.conn.SystemService().EventsService()
 	var data map[string]interface{}
 
+	events := map[int64]string{}
+	keys := []int64{}
+
 	allevents := eventsService.List().Search("origin=openshift-ci").MustSend()
 	for _, event := range allevents.MustEvents().Slice() {
 		fdata := strings.Split(event.MustDescription(), ";")
 		if len(fdata) > 2 {
 			json.Unmarshal([]byte(fdata[3]), &data)
-			clusterStatus := strings.TrimSpace(fdata[2])
+			//clusterStatus := strings.TrimSpace(fdata[2])
 			clusterid := strings.TrimSpace(fdata[1])
-			prLink := data["refs"].(map[string]interface{})["pulls"].([]interface{})[0].(map[string]interface{})["link"]
+			jobtype := data["type"]
+
+			//log.Printf("AAA %s", data["refs"])
+			//if data["refs"] == nil {
+			//	continue
+			//}
+
+			var prLink interface{}
+
+			if jobtype != "presubmit" {
+				prLink = "Release"
+			} else {
+				prLink = data["refs"].(map[string]interface{})["pulls"].([]interface{})[0].(map[string]interface{})["link"]
+			}
+
+			buildId, _ := strconv.ParseInt(data["buildid"].(string), 10, 64)
+			//data["buildid"].(int64)
+
+			//log.Printf("AAA %s", buildId)
 
 			if clusterid == cluster {
-				return fmt.Sprintf("%v", prLink)
+				events[buildId] = fmt.Sprintf("%v", prLink)
+				//log.Printf("AAA %s - %s", clusterid, prLink)
+				keys = append(keys, buildId)
+				//return fmt.Sprintf("%v", prLink)
 			}
 
 		}
 	}
-	return ""
+	//sort the keys in descend order (we need the recent build)
+	sort.Slice(keys, func(i, j int) bool { return keys[i] > keys[j] })
+	return fmt.Sprintf("%v", events[keys[0]])
+
 }
 
 func (e *Engine) ListEvents() {
@@ -100,8 +129,8 @@ func (e *Engine) ListEvents() {
 	for _, event := range events.MustEvents().Slice() {
 		fdata := strings.Split(event.MustDescription(), ";")
 		if len(fdata) > 2 {
-			json.Unmarshal([]byte(fdata[2]), &data)
-			fmt.Printf("%s - cluster:%s \n", data["refs"].(map[string]interface{})["pulls"].([]interface{})[0].(map[string]interface{})["link"], fdata[3])
+			json.Unmarshal([]byte(fdata[3]), &data)
+			fmt.Printf("%s - cluster:%s \n", data["refs"].(map[string]interface{})["pulls"].([]interface{})[0].(map[string]interface{})["link"], fdata[1])
 		}
 	}
 }

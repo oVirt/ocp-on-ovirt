@@ -12,7 +12,7 @@ func main() {
 	oengine := ovirtci.Engine{}
 	oengine.ConnectToOvirt()
 
-	oengine.ListEvents()
+	//oengine.ListEvents()
 	engineVms := oengine.ListVMs()
 
 	// iterate over VM list
