@@ -14,6 +14,7 @@
     nics:
       - name: eth0
         profile_name: "{{mgmt_network}}"
+        mac_address: "{{mgmt_mac_address | default(omit)}}"
 
     cloud_init:
       nic_boot_protocol: "{{mgmt_boot_protocol | default('dhcp')}}"
