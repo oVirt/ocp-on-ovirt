@@ -1,0 +1,41 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: schedule-prfinder-update-vms
+spec:
+  schedule: "* * * * *"
+  concurrencyPolicy: "Replace"
+  startingDeadlineSeconds: 200
+  suspend: false
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  backoffLimit: 0
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          name: schedule-prfinder-update-vms
+        spec:
+          backoffLimit: 0
+          containers:
+          - name: setup
+            image: 'registry.svc.ci.openshift.org/ovirt/prfinder:latest'
+            imagePullPolicy: IfNotPresent
+            terminationMessagePolicy: FallbackToLogsOnError
+            volumeMounts:
+            - name: cluster-profile
+              mountPath: /etc/openshift-installer
+            command:
+              - /bin/sh
+              - -c
+              - |
+                #!/bin/sh
+                set -a 
+                source /etc/openshift-installer/ovirt.conf
+                /bin/prFinder
+    
+          volumes:
+            - name: cluster-profile
+              secret:
+                secretName: cluster-secrets-ovirt
+          restartPolicy: Never

@@ -1,0 +1,27 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: prfinder-build
+spec:
+  failedBuildsHistoryLimit: 5
+  successfulBuildsHistoryLimit: 5
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: prfinder:latest
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    #contextDir: images/tests
+    contextDir: /ocp-on-rhv-ci/tools/ovirtci
+    git:
+      ref: master
+      uri: https://github.com/oVirt/ocp-on-ovirt.git
+    type: Git
+  strategy:
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+    type: Docker
+  triggers: []

@@ -1,11 +1,7 @@
-# This Dockerfile is used by CI to publish the installer image.
-# It builds an image containing only the openshift-install.
-
+# This Dockerfile is used by ocp-on-rhv CI to publish the prFinder image
 FROM registry.svc.ci.openshift.org/openshift/release:golang-1.14 AS builder
-#ADD . /go/src/github.com/ovirt/ocp-on-ovirt/ocp-on-rhv-ci/tools/ovirtci
 WORKDIR /go/src/github.com/oVirt/ocp-on-ovirt/ocp-on-rhv-ci/tools/ovirtci
 COPY . .
-#RUN go build -mod vendor cli/prFinder.go
 RUN hack/build.sh
 
 
