@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"ocp-ci/oVirt/ovirtci"
 	"os/user"
 	"path/filepath"
 	"strings"
+
+	"github.com/oVirt/ocp-on-ovirt/ocp-on-rhv-ci/tools/ovirtci/ovirtci"
 
 	log "github.com/sirupsen/logrus"
 )
