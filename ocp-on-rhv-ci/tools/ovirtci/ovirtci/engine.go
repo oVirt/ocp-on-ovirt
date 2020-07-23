@@ -116,8 +116,12 @@ func (e *Engine) GetLastPRForCluster(cluster string) string {
 		}
 	}
 	//sort the keys in descend order (we need the recent build)
-	sort.Slice(keys, func(i, j int) bool { return keys[i] > keys[j] })
-	return fmt.Sprintf("%v", events[keys[0]])
+	if len(keys) > 0 {
+		sort.Slice(keys, func(i, j int) bool { return keys[i] > keys[j] })
+		return fmt.Sprintf("%v", events[keys[0]])
+	}
+
+	return fmt.Sprintf("missing info for %s", cluster)
 
 }
 
