@@ -20,7 +20,7 @@ spec:
           containers:
           - name: setup
             image: 'registry.svc.ci.openshift.org/ovirt/prfinder:latest'
-            imagePullPolicy: IfNotPresent
+            imagePullPolicy: Always
             terminationMessagePolicy: FallbackToLogsOnError
             volumeMounts:
             - name: cluster-profile
@@ -30,10 +30,10 @@ spec:
               - -c
               - |
                 #!/bin/sh
-                set -a 
+                set -a
                 source /etc/openshift-installer/ovirt.conf
                 /bin/prFinder
-    
+
           volumes:
             - name: cluster-profile
               secret:
