@@ -1,0 +1,122 @@
+apiVersion: v1
+data:
+  delete_vm_if_older.yaml: |
+    - set_fact:
+        seconds_since_creation: "{{((ansible_date_time.epoch | int) - ( vm_creation_epoch | int )) }}"
+    - set_fact: to_be_deleted="{{  seconds_since_creation | int  >= seconds_limit | int }}"
+    - name: "removing VM - {{ vm_name }}} "
+      ovirt_vm:
+        auth: "{{ ovirt_auth }}"
+        state: absent
+        name: "{{ vm_name }}"
+      when: to_be_deleted
+
+    - debug: msg="{{ 'id:' + vm_id + ' name:' + vm_name +' vm_creation_epoch:' + vm_creation_epoch + ' to_be_deleted:' + ( to_be_deleted | string ) }}"
+  ovirt_remove_old_vms.yaml: |
+    ---
+      - name: remove vms from engine
+        hosts: localhost
+        connection: local
+        vars:
+          max_hours: 3
+          vms_to_exclude:
+            - proxy-vm
+            - ovirt-proxy-VM
+        pre_tasks:
+          - name: download CA file from engine
+            get_url:
+              url: "https://{{ lookup('env','OVIRT_ENGINE_URL') | urlsplit('hostname') }}/ovirt-engine/services/pki-resource?resource=ca-certificate&format=X509-PEM-CA"
+              dest: "/tmp/ca.pem"
+              validate_certs: no
+          - name: Login to RHV
+            ovirt_auth:
+              url: "{{ lookup('env','OVIRT_ENGINE_URL') }}"
+              username: "{{ lookup('env','OVIRT_ENGINE_USERNAME') }}"
+              password: "{{ lookup('env','OVIRT_ENGINE_PASSWORD') }}"
+              ca_file: "/tmp/ca.pem"
+              insecure: "true"
+            tags:
+              - always
+        tasks:
+          - block:
+            - name: Collect error events from the Engine
+              ovirt_vm_info:
+                auth: "{{ ovirt_auth }}"
+              register: vms_info
+            - name: delete older vms
+              include_tasks: delete_vm_if_older.yaml
+              vars:
+                vm_creation_epoch: "{{ (item['creation_time'].split('.')[0] | to_datetime).strftime('%s') | int }}"
+                seconds_limit: "{{ max_hours*3600  }}"
+                vm_id: "{{ item['id'] }}"
+                vm_name: "{{ item['name'] }}"
+              loop: "{{ vms_info['ovirt_vms'] }}"
+              when: "item['name'] not in vms_to_exclude"
+        post_tasks:
+          - name: Logout from RHV
+            ovirt_auth:
+              state: absent
+              ovirt_auth: "{{ ovirt_auth }}"
+  ovirt_remove_vms.yaml: |
+    ---
+      - name: remove vms from engine
+        hosts: localhost
+        connection: local
+
+        pre_tasks:
+          - fail: msg="The variable 'cluster_name' is empty"
+            when: cluster_name|length == 0
+
+          - name: download CA file from engine
+            get_url:
+              url: "https://{{ lookup('env','OVIRT_ENGINE_URL') | urlsplit('hostname') }}/ovirt-engine/services/pki-resource?resource=ca-certificate&format=X509-PEM-CA"
+              dest: "/tmp/ca.pem"
+              validate_certs: no
+
+          - name: Login to RHV
+            ovirt_auth:
+              url: "{{ lookup('env','OVIRT_ENGINE_URL') }}"
+              username: "{{ lookup('env','OVIRT_ENGINE_USERNAME') }}"
+              password: "{{ lookup('env','OVIRT_ENGINE_PASSWORD') }}"
+              ca_file: "/tmp/ca.pem"
+              insecure: "true"
+            tags:
+              - always
+
+        tasks:
+          - ovirt_vm_info:
+              auth: "{{ ovirt_auth }}"
+              pattern: name="*{{ cluster_name }}*"
+            register: result
+
+          - name: "removing VM - {{ item.name }}} "
+            ovirt_vm:
+              auth: "{{ ovirt_auth }}"
+              state: absent
+              name: "{{ item.name }}"
+            with_items: "{{ result.ovirt_vms }}"
+
+        post_tasks:
+          - name: Logout from RHV
+            ovirt_auth:
+              state: absent
+              ovirt_auth: "{{ ovirt_auth }}"
+  teardown-with-ansible.sh: |-
+    #!/bin/bash
+
+    cat <<__EOF__ >~/.ansible.cfg
+    [defaults]
+    host_key_checking = False
+    __EOF__
+
+    set -o allexport
+    source /etc/openshift-installer/ovirt.conf
+    source /tmp/shared/ovirt-lease.conf
+
+    ansible-playbook ovirt_remove_vms.yaml -e cluster_name=$ocp_cluster_id
+    set +o allexport
+kind: ConfigMap
+metadata:
+  name: ocp-on-rhv-ci-scripts
+  namespace: ovirt
+
