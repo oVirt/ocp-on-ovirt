@@ -1,14 +1,14 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: e2e-suite
+  name: PLACEHOLDER_JOB_NAME
   labels:
     jobgroup: ansible-runner
 spec:
   backoffLimit: 0
   template:
     metadata:
-      name: e2e-suite
+      name: PLACEHOLDER_JOB_NAME
       labels:
         jobgroup: ansible-runner
     spec:
@@ -444,12 +444,22 @@ spec:
           if [ "${TEST}" == "conformance" ]; then
             openshift-tests run openshift/conformance/parallel \
               --provider '{"type":"ovirt"}' -o run_conformance.log -junit-dir junit/
-          else
+          fi
+          if [ "${TEST}" == "minimal" ]; then
             # Grab all of the tests marked Feature:Builds and conformance/parallel/minimal
             openshift-tests run openshift/conformance/parallel --dry-run |
               grep 'Early' |
-            openshift-tests run -o run_conformance.log --provider '{"type":"ovirt"}' \
-              -junit-dir junit/ -f -
+            openshift-tests run -o run_miminal.log --provider '{"type":"ovirt"}' -junit-dir junit/ -f -
+          fi
+          if [ "${TEST}" == "csi" ]; then
+            for url in $(curl -s https://api.github.com/repos/ovirt/csi-driver-operator/contents/manifests | jq '.[].download_url'); do
+              echo ${url}| xargs curl -L| oc create -f -
+              sleep 30s
+            done
+            oc delete storageclasses/ovirt-csi-sc
+            oc apply -f /etc/openshift-installer/storageclass.yaml
+            sleep 1m
+            TEST_CSI_DRIVER_FILES=/etc/openshift-installer/csi-test-manifest.yaml openshift-tests run --provider '{"type":"ovirt"}' -o run_conformance.log -junit-dir junit/  openshift/csi
           fi
 
           if [ "${STOP_AFTER_TEST}" == "true" ]; then
