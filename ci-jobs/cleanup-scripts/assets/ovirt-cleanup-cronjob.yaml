@@ -1,7 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: schedule-ovirt-cleanup-old-vms
+  name: schedule-ovirt-engine-cleanup
   namespace: ovirt
 spec:
   schedule: "20 * * * *"
@@ -15,14 +15,12 @@ spec:
     spec:
       template:
         metadata:
-          name: schedule-ovirt-cleanup-old-vms
-
+          name: schedule-ovirt-engine-cleanup
         spec:
           backoffLimit: 0
           containers:
-          - name: ovirt-vm-cleaner
+          - name: ovirt-engine-cleaner
             image: quay.io/eslutsky/ansible-runner
-
             command:
             - /bin/bash
             - -c
@@ -35,8 +33,6 @@ spec:
                   cat /tmp/passwd >> /etc/passwd
                   rm /tmp/passwd
               fi
-
-
 
               mkdir -p ~/.ssh/
               chmod 700 ~/.ssh/
@@ -56,8 +52,7 @@ spec:
 
               source /etc/openshift-installer/ovirt.conf
               cd /tmp/scripts
-              ansible-playbook ovirt_remove_old_vms.yaml	-vvv
-
+              ansible-playbook ovirt_remove_old_resources.yaml	-vvv
 
             volumeMounts:
             - name: config-gcp-secrets
@@ -68,12 +63,10 @@ spec:
               mountPath: /etc/openshift-installer
             - name: scripts
               mountPath: /tmp/scripts
-
           volumes:
             - name: config-gcp-secrets
               secret:
                 secretName: ovirt-infra-gcp-secrets
-
             - name: shared-tmp
               emptyDir: {}
             - name: cluster-profile
@@ -82,5 +75,4 @@ spec:
             - name: scripts
               configMap:
                 name: ocp-on-rhv-ci-scripts
-
           restartPolicy: Never
