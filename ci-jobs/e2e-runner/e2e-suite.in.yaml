@@ -99,6 +99,8 @@ spec:
           MASTER_MEM="${master_mem}"
           OCP_CLUSTER="$(extract_leases_info cluster_name ${lease_path})"
           OVIRT_ENGINE_CLUSTER_ID="$(extract_leases_info ovirt_engine_cluster_id ${lease_path})"
+          OVIRT_ENGINE_NETWORK="$(extract_leases_info ovirt_network_name ${lease_path})"
+          OVIRT_ENGINE_VNIC_PEOFILE_ID="$(extract_leases_info ovirt_vnic_profile_id ${lease_path})"
           OVIRT_ENGINE_TEMPLATE_NAME="${ovirt_engine_template_name}"
           EOF
 
@@ -200,6 +202,8 @@ spec:
             OCP_CLUSTER="ovirt18"
             OVIRT_ENGINE_CLUSTER_ID="8c93d26d-802b-4214-a9f5-58267dab3419"
             OVIRT_ENGINE_TEMPLATE_NAME="${template_name}"
+            OVIRT_ENGINE_NETWORK="ovn-vmnet-16"
+            OVIRT_ENGINE_VNIC_PEOFILE_ID="272dfd88-44eb-4835-a99c-e309e4bd239d"
             WORKER_CPU="${worker_cpu}"
             WORKER_MEM="${worker_mem}"
             MASTER_CPU="${master_cpu}"
@@ -271,6 +275,8 @@ spec:
                 ovirt_storage_domain_id: ${OVIRT_ENGINE_STORAGE_DOMAIN_ID}
                 api_vip: ${OVIRT_APIVIP}
                 dns_vip: ${OVIRT_DNSVIP}
+                ovirt_network_name: ${OVIRT_ENGINE_NETWORK}
+                vnicProfileID: ${OVIRT_ENGINE_VNIC_PEOFILE_ID}
                 ingress_vip: ${OVIRT_INGRESSVIP}
             pullSecret: >
               ${PULL_SECRET}
@@ -342,13 +348,17 @@ spec:
           mv /tmp/shared/artifacts/installer/master.ign.out /tmp/shared/artifacts/installer/master.ign
 
           export KUBECONFIG=/tmp/shared/artifacts/installer/auth/kubeconfig
-          update_image_registry &
+          if [[ "$PLACEHOLDER_OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE" =~ ((.*4.5.*)|(.*4.4.*)) ]]; then
+            update_image_registry &
+          fi
 
           # What were doing here is we generate manifests first and force that OpenShift SDN is configured.
           TF_LOG=debug openshift-install --dir=/tmp/shared/artifacts/installer create manifests --log-level=debug
 
           sed -i '/^  channel:/d' /tmp/shared/artifacts/installer/manifests/cvo-overrides.yaml
           echo "done with manifests"
+
+          export HOME=/tmp/
 
           TF_LOG=debug openshift-install --dir=/tmp/shared/artifacts/installer create cluster --log-level=debug
 

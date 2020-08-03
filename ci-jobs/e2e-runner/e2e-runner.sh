@@ -31,7 +31,7 @@ TEST="minimal"
 JOB_NAME="e2e-job-${RELEASE_IMAGE_TAG}-${LEASE_TYPE}"
 #true || false
 USE_LEASE="true"
-USE_OVIRT_TEMPLATE="true"
+USE_OVIRT_TEMPLATE="false"
 STOP_AFTER_SETUP="false"
 STOP_AFTER_TEST="false"
 STOP_BEFORE_TEST="true"
