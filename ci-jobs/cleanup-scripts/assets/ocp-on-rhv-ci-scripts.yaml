@@ -10,11 +10,21 @@ data:
         state: absent
         name: "{{ vm_name }}"
       when: to_be_deleted
-
     - debug: msg="{{ 'id:' + vm_id + ' name:' + vm_name +' vm_creation_epoch:' + vm_creation_epoch + ' to_be_deleted:' + ( to_be_deleted | string ) }}"
-  ovirt_remove_old_vms.yaml: |
+  delete_template_if_older.yaml: |
+    - set_fact:
+        seconds_since_creation: "{{((ansible_date_time.epoch | int) - ( template_creation_epoch | int )) }}"
+    - set_fact: to_be_deleted="{{  seconds_since_creation | int  >= seconds_limit | int }}"
+    - name: "removing template - {{ template_name }}} "
+      ovirt_template:
+        auth: "{{ ovirt_auth }}"
+        state: absent
+        name: "{{ template_name }}"
+      when: to_be_deleted
+    - debug: msg="{{ 'id:' + template_id + ' name:' + template_name +' template_creation_epoch:' + template_creation_epoch + ' to_be_deleted:' + ( to_be_deleted | string ) }}"
+  ovirt_remove_old_resources.yaml: |
     ---
-      - name: remove vms from engine
+      - name: remove old resources from the oVirt CI engine
         hosts: localhost
         connection: local
         vars:
@@ -22,7 +32,11 @@ data:
           vms_to_exclude:
             - proxy-vm
             - ovirt-proxy-VM
-        pre_tasks:
+          templates_to_exclude_regex: ovirt1.*
+          templates_to_exclude_list:
+            - Blank
+            - centos-7
+        tasks:
           - name: download CA file from engine
             get_url:
               url: "https://{{ lookup('env','OVIRT_ENGINE_URL') | urlsplit('hostname') }}/ovirt-engine/services/pki-resource?resource=ca-certificate&format=X509-PEM-CA"
@@ -37,26 +51,40 @@ data:
               insecure: "true"
             tags:
               - always
-        tasks:
-          - block:
-            - name: Collect error events from the Engine
-              ovirt_vm_info:
-                auth: "{{ ovirt_auth }}"
-              register: vms_info
-            - name: delete older vms
-              include_tasks: delete_vm_if_older.yaml
-              vars:
-                vm_creation_epoch: "{{ (item['creation_time'].split('.')[0] | to_datetime).strftime('%s') | int }}"
-                seconds_limit: "{{ max_hours*3600  }}"
-                vm_id: "{{ item['id'] }}"
-                vm_name: "{{ item['name'] }}"
-              loop: "{{ vms_info['ovirt_vms'] }}"
-              when: "item['name'] not in vms_to_exclude"
-        post_tasks:
+          - name: Gather information about all VMs
+            ovirt_vm_info:
+              auth: "{{ ovirt_auth }}"
+            register: vms_info
+          - name: delete old vms
+            include_tasks: delete_vm_if_older.yaml
+            vars:
+              vm_creation_epoch: "{{ (item['creation_time'].split('.')[0] | to_datetime).strftime('%s') | int }}"
+              seconds_limit: "{{ max_hours*3600  }}"
+              vm_id: "{{ item['id'] }}"
+              vm_name: "{{ item['name'] }}"
+            loop: "{{ vms_info['ovirt_vms'] }}"
+            when: "item['name'] not in vms_to_exclude"
+          - name: Gather information about all templates
+            ovirt_template_info:
+              auth: "{{ ovirt_auth }}"
+            register: templates_info
+          - name: delete old templates
+            include_tasks: delete_template_if_older.yaml
+            vars:
+              template_creation_epoch: "{{ (item['creation_time'].split('.')[0] | to_datetime).strftime('%s') | int }}"
+              seconds_limit: "{{ max_hours*3600  }}"
+              template_id: "{{ item['id'] }}"
+              template_name: "{{ item['name'] }}"
+            loop: "{{ templates_info['ovirt_templates'] }}"
+            when:
+              - "item['name'] is regex(templates_to_exclude_regex)"
+              - "item['name'] not in templates_to_exclude_list"
           - name: Logout from RHV
             ovirt_auth:
               state: absent
               ovirt_auth: "{{ ovirt_auth }}"
+            tags:
+              - always
   ovirt_remove_vms.yaml: |
     ---
       - name: remove vms from engine
