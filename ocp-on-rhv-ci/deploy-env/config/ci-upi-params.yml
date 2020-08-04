@@ -1,0 +1,48 @@
+---
+
+external_address: 169.63.244.93
+external_netmask: 255.255.255.240
+external_gateway: 169.63.244.81
+mgmt_boot_protocol: static
+mgmt_network: ovirtmgmt
+external_hostname: upi-proxy-vm.rhv44.gcp.devcluster.openshift.com
+host_running_proxy: baremetal01
+vm_name: upi-proxy-vm
+storage_name: ibm-nfs
+ocp_network_prefix: ovn-vmnet
+base_domain: gcp.devcluster.openshift.com
+cluster_description: OCP
+cluster_name: cluster-ovn 
+ocp_network_count: 4
+ocp_network_start: 30
+ocp_networks:
+- nic: eth1
+  name: net-30
+  dhcp_range: 192.168.230.101,192.168.230.150,5m
+  dns: 8.8.8.8
+  address: 192.168.230.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.230.32
+  api_internal_address: 192.168.230.30
+  api_fqdn: api.ovirt30.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt30.ocp.localvms.com
+- nic: eth2
+  name: net-31
+  dhcp_range: 192.168.231.101,192.168.231.150,5m
+  dns: 8.8.8.8
+  address: 192.168.231.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.231.32
+  api_internal_address: 192.168.231.30
+  api_fqdn: api.ovirt31.gcp.devcluster.openshift.com
+  apps_fqdn: api.ovirt31.gcp.devcluster.openshift.com
+- nic: eth3
+  name: net-32
+  dhcp_range: 192.168.232.101,192.168.232.150,5m
+  dns: 8.8.8.8
+  address: 192.168.232.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.232.32
+  api_internal_address: 192.168.232.30
+  api_fqdn: api.ovirt32.gcp.devcluster.openshift.com
+  apps_fqdn: api.ovirt32.gcp.devcluster.openshift.com
