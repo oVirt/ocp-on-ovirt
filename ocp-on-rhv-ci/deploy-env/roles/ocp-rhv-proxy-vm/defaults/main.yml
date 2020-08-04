@@ -4,7 +4,8 @@ root_password: 123456
 external_nic: eth0
 template_name: centos-7
 mgmt_network: ovn-test
-mgmt_mac_address: null
+vm_name: proxy-vm
+#mgmt_mac_address: null
 ocp_networks:
 - nic: eth1
   name: net-10

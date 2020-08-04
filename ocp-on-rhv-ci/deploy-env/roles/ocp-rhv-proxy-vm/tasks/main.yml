@@ -2,7 +2,7 @@
 
 - name: provision VM with cloud init
   ovirt_vm:
-    name: proxy-vm
+    name: "{{vm_name}}"
     template: "{{template_name}}"
     cluster: "{{cluster_name}}"
     auth: "{{ovirt_auth}}"
@@ -18,7 +18,7 @@
 
     cloud_init:
       nic_boot_protocol: "{{mgmt_boot_protocol | default('dhcp')}}"
-      nic_ip_address: "{{external_address | default(omit) }}"
+      nic_ip_address: "{{external_address | default(omit)}}"
       nic_netmask: "{{external_netmask | default(omit)}}"
       authorized_ssh_keys: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
       nic_gateway: "{{external_gateway | default(omit)}}"
@@ -33,14 +33,14 @@
       nic_on_boot: true
       host_name: "{{external_hostname | default(omit)}}"
       user_name: root
-      root_password: "{{root_password}}"
+      root_password: "{{root_password | default(omit)}}"
   delegate_to: localhost
 
 - name: attach nics to the vm
   ovirt_nic:
     state: present
     auth: "{{ovirt_auth}}"
-    vm: proxy-vm
+    vm: "{{vm_name}}"
     name: "{{item.nic}}"
     network: "ovn-vm{{item.name}}"
   with_items: "{{ocp_networks}}"
