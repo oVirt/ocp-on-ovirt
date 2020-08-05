@@ -32,6 +32,7 @@ data:
           vms_to_exclude:
             - proxy-vm
             - ovirt-proxy-VM
+            - upi-proxy-vm
           templates_to_exclude_regex: ovirt1.*
           templates_to_exclude_list:
             - Blank
