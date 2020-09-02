@@ -81,4 +81,4 @@ sed -e "s|PLACEHOLDER_LEASE_TYPE|\"${LEASE_TYPE}\"|" \
     -e "s|PLACEHOLDER_TEST|\"${TEST}\"|" \
     -e "s|PLACEHOLDER_STOP_AFTER_TEST|\"${STOP_AFTER_TEST}\"|" \
     -e "s|PLACEHOLDER_JOB_NAME|\"${JOB_NAME}\"|" \
-    -e "s|PLACEHOLDER_STOP_BEFORE_TEST|\"${STOP_BEFORE_TEST}\"|" /home/gzaidman/workspace/upstream/ocp/ocp-ci-tools/ci-jobs/e2e-runner/e2e-suite.in.yaml > ${JOB_NAME}.yaml
+    -e "s|PLACEHOLDER_STOP_BEFORE_TEST|\"${STOP_BEFORE_TEST}\"|" e2e-suite.in.yaml > ${JOB_NAME}.yaml

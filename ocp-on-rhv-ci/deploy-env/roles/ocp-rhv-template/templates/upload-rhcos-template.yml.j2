@@ -10,12 +10,12 @@
     engine_cafile: /etc/pki/ovirt-engine/ca.pem
     engine_insecure: true
     template_cluster: {{cluster_name}}
-    template_name: rhcos-master
+    template_name: rhcos-master2
     template_memory: 4GiB
     template_operating_system: rhcos_x64
     template_cpu: 2
     template_disk_size: 30GiB
-    template_disk_storage: {{storage_name}}}
+    template_disk_storage: {{storage_name}}
     template_nics:
       - name: nic1
         profile_name: {{ocp_network_profile}}
