@@ -2,7 +2,6 @@
 ---
   - name: create ocp-for-rhv CI env
     hosts: localhost
-    connection: local
 
     vars:
       ovirt_engine_url: "{{ lookup('env','OVIRT_ENGINE_URL') }}"
