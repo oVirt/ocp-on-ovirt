@@ -24,11 +24,11 @@ type PullRequestData struct {
 	mDate time.Time
 }
 
-var prd PullRequestData
+var prd *PullRequestData
 var releaseStatusCrawler *colly.Collector
 var releasePageCrawler *colly.Collector
 
-const OPENSHIFT_RELEASE_DOMAIN string = "openshift-release.svc.ci.openshift.org"
+const OPENSHIFT_RELEASE_DOMAIN string = "openshift-release.apps.ci.l2s4.p1.openshiftapps.com"
 const PR_DATE_FORMAT string = "2006-01-02-150405"
 
 // Gets a PR URL and returns the organization, repo and ID of that PR.
@@ -72,14 +72,14 @@ func getGithubPrData(org string, repo string, id int) (*github.PullRequest, erro
 	return pr, err
 }
 
-func createPullRequestData(prURL string) (*PullRequestData, error) {
+func newPullRequestData(prURL string) (*PullRequestData, error) {
 	org, repo, id, err := parsePrURL(prURL)
 	if err != nil {
-		return PullRequestData{}, err
+		return &PullRequestData{}, err
 	}
 	pr, err := getGithubPrData(org, repo, id)
 	if err != nil {
-		return PullRequestData{}, err
+		return &PullRequestData{}, err
 	}
 	return &PullRequestData{
 		org:   org,
@@ -156,7 +156,7 @@ func main() {
 	debug := flag.Bool("debug", false, "run with debug")
 	flag.Parse()
 	url := flag.Arg(0)
-	prd, err = *createPullRequestData(url)
+	prd, err = newPullRequestData(url)
 	if err != nil {
 		panic(err)
 	}
