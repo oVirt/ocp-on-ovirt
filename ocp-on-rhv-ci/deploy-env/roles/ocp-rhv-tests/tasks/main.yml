@@ -21,7 +21,7 @@
       nic_boot_protocol: dhcp
       nic_on_boot: true
       user_name: root
-      root_password: "{{root_password}}"
+      root_password: "{{root_password | default(omit)}}"
 
 
 - name: wait until IP is reported to the engine
