@@ -33,7 +33,6 @@
       nic_on_boot: true
       host_name: "{{external_hostname | default(omit)}}"
       user_name: root
-      root_password: "{{root_password}}"
   delegate_to: localhost
 
 - name: attach nics to the vm

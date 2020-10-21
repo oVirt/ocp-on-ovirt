@@ -9,7 +9,8 @@
     - 8Gb for each worker x 2
     - 20VCPUs
 - DC with Attached Storage at least 100GB (not production)
-  
+- create ssh public key under user ~/.ssh/id_rsa.pub
+
 ## deployment summary
 
 the deployment Consists of 4 stages:
