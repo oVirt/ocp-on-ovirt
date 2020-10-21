@@ -1,0 +1,1 @@
+proxy-vm ansible_ssh_host=eslutsky-proxy-vm.lab.eng.tlv2.redhat.com ansible_ssh_user=root

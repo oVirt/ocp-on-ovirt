@@ -1,0 +1,47 @@
+---
+  - name: add host to engine
+    hosts: localhost
+    connection: local
+#    become: yes
+    pre_tasks:
+      - name: Login to RHV
+        ovirt_auth:
+          url: "https://localhost/ovirt-engine/api"
+          username: "admin@internal"
+          password: "123456"
+          ca_file: "/etc/pki/ovirt-engine/ca.pem"
+          insecure: "true"
+        tags:
+          - always
+    vars:
+      cluster_name: "{{cluster_name}}"
+      template_name: "{{template_name}}"
+      result_json_path: "{{ result_json_path }}"
+
+{% raw %}
+    tasks:
+      - ovirt_cluster_info:
+          auth: "{{ ovirt_auth }}"
+          pattern:   "name={{ cluster_name }}"
+        register: result
+      - set_fact:
+          cluster_id: "{{ result['ovirt_clusters'][0]['id'] }}"
+
+
+      - ovirt_template_info:
+          auth: "{{ ovirt_auth }}"
+          pattern: "name={{ template_name }}"
+        register: result
+      - set_fact: template_id="{{ result['ovirt_templates'][0]['id'] }}"
+
+      - copy:
+          content: "{{ hostvars[inventory_hostname] | to_nice_json }}"
+          dest: "{{ result_json_path }}"
+
+
+    post_tasks:
+      - name: Logout from RHV
+        ovirt_auth:
+          state: absent
+          ovirt_auth: "{{ ovirt_auth }}"
+{% endraw %}

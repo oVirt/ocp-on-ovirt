@@ -1,0 +1,29 @@
+---
+
+data_center_name: OCP-43
+storage_name: OCP43
+cluster_description: OCP-43
+cluster_name: OCP-43
+ocp_network_prefix: "ovn-vmnet"
+ocp_network_count: 11
+ocp_network_start: 10
+mgmt_network: ovirtmgmt
+#template_name: centos-7
+template_name: rhcos-master43
+
+engine_fqdn: engine2.es.localvms.com
+mgmt_boot_protocol: dhcp
+external_hostname: eslutsky-proxy-vm.es.localvms.com
+external_address: 10.46.8.167
+base_domain: ocp.localvms.com
+ocp_networks:
+- nic: eth1
+  name: net-10
+  dhcp_range: 192.168.210.101,192.168.210.150,5m
+  dns: 8.8.8.8
+  address: 192.168.210.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.210.32
+  api_internal_address: 192.168.210.30
+  api_fqdn: api.ovirt10.ocp.localvms.com
+  apps_fqdn: apps.ovirt10.ocp.localvms.com

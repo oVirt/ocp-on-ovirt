@@ -1,0 +1,1 @@
+proxy-vm ansible_ssh_host=upi-proxy-vm.rhv44.gcp.devcluster.openshift.com ansible_ssh_user=root
