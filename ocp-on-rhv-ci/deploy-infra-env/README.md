@@ -14,9 +14,12 @@
 
 the deployment Consists of 4 stages:
 
-- creating OVN networks for internal Cluster OCP communication
-- spawning proxy VM for outside communication
+- creating OVN networks for between VM communication
+- creating proxy VM:
+  - it will serve as Router,DHCP,NAT,DNS (dnsmasq) and HAProxy.
+  - it will have one external nic (ovirtmgmt) and additional nic for each ovn network.
 - sanity tests
+  - spawn test VM that will try to communicate through the proxy-vm
   
 Each stage can be run separately using ansible tag or everything can run in one flow.
 
@@ -32,21 +35,25 @@ Each stage can be run separately using ansible tag or everything can run in one 
 - prepare your env configuration, examples can be found [here](https://github.com/oVirt/ocp-on-ovirt/tree/master/ocp-on-rhv-ci/deploy-env/config)
   
 - running full deployment
-- 
+  
   ```bash
   ansible-playbook ocp_on_rhv-deploy.yml -e@config/ci-bm-params.yml
+  ```
 
 - provision OVN networks only
+  
   ```bash
   ansible-playbook ocp_on_rhv-deploy.yml -t networks -e@config/ci-bm-params.yml
   ```
 
 - running proxy-vm provision only
+  
   ```bash
   ansible-playbook ocp_on_rhv-deploy.yml -t proxy-vm -e@config/ci-bm-params.yml
   ```
 
 - running environment sanity tests throught the proxy-vm
+  
   ```bash
   ansible-playbook ocp_on_rhv-deploy.yml -t ovirt-ocp-tests -e@config/ci-bm-params.yml
   ```
