@@ -1,0 +1,189 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ovirt
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana
+data:
+  prometheus_ds.yaml: |
+    apiVersion: 1
+
+    datasources:
+      - name: prometheus
+        type: prometheus
+        isDefault: true
+        access: proxy
+        url: http://localhost:9090
+
+  prometheus_config.yaml: |
+    # my global config
+    global:
+      scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+      evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+      # scrape_timeout is set to the global default (10s).
+
+    # Alertmanager configuration
+    alerting:
+      alertmanagers:
+      - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+    # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+    rule_files:
+      # - "first_rules.yml"
+      # - "second_rules.yml"
+
+    # A scrape configuration containing exactly one endpoint to scrape:
+    # Here it's Prometheus itself.
+    scrape_configs:
+      # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+      - job_name: 'node'
+
+        # metrics_path defaults to '/metrics'
+        # scheme defaults to 'http'.
+
+        static_configs:
+        - targets: ['baremetal01.ocp-on-ovirt.gcp.devcluster.openshift.com:9100']        
+        - targets: ['baremetal04.ocp-on-ovirt.gcp.devcluster.openshift.com:9100']
+        - targets: ['baremetal06.ocp-on-ovirt.gcp.devcluster.openshift.com:9100']
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ovirt-prometheus
+  name: ovirt-prometheus
+  namespace: ovirt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ovirt-prometheus
+  template:
+    metadata:
+      labels:
+        app: ovirt-prometheus
+    spec:
+      containers:
+        - image: grafana/grafana:latest
+          imagePullPolicy: IfNotPresent
+          name: ovirt-grafana
+          ports:
+          - containerPort: 3000
+            protocol: TCP
+          env:
+          - name: GF_SECURITY_ADMIN_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                name: prometheus
+                key: GF_SECURITY_ADMIN_PASSWORD
+          volumeMounts:
+          - mountPath: /etc/grafana/provisioning/datasources/custom.yaml
+            name: grafana
+            subPath: prometheus_ds.yaml
+
+        - image: quay.io/prometheus/prometheus:latest
+          imagePullPolicy: IfNotPresent
+          name: ovirt-prometheus
+          ports:
+          - containerPort: 9090
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /prometheus
+            name: prom-volume-1
+          - mountPath: /etc/prometheus/prometheus.yml
+            name: grafana
+            subPath: prometheus_config.yaml
+
+          readinessProbe:
+            httpGet:
+              port: 9090
+            timeoutSeconds: 2
+      volumes:
+      - emptyDir: {}
+        name: prom-volume-1
+      - configMap:
+          name: grafana
+        name: grafana
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ovirt-prometheus
+  name: ovirt-prometheus
+  namespace: ovirt
+spec:
+  ports:
+  - port: 3000
+    protocol: TCP
+    targetPort: 3000
+    name: grafana
+  - port: 9090
+    protocol: TCP
+    targetPort: 9090
+    name: prometheus
+
+  selector:
+    app: ovirt-prometheus
+  type: ClusterIP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: ovirt-prometheus
+  name: prometheus
+  namespace: ovirt
+spec:
+  host: prometheus-ovirt.svc.ci.openshift.org
+  port:
+    targetPort: prometheus
+  to:
+    kind: Service
+    name: ovirt-prometheus
+    weight: 100
+  wildcardPolicy: None
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: ovirt-prometheus
+  name: grafana
+  namespace: ovirt
+spec:
+  host: grafana-ovirt.svc.ci.openshift.org
+  port:
+    targetPort: grafana
+  to:
+    kind: Service
+    name: ovirt-prometheus
+    weight: 100
+  wildcardPolicy: None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

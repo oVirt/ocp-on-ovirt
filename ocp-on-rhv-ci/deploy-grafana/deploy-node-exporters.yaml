@@ -1,0 +1,50 @@
+---
+  - name: add hosts to inventory
+    hosts: localhost
+    connection: local
+    tags:
+    - firewall
+    - exporter
+    - prometheus
+    - grafana
+
+    tasks:
+    - add_host:
+        hostname: "baremetal01.ocp-on-ovirt.gcp.devcluster.openshift.com"
+        ansible_become: true
+        groups:
+        - rhv-node
+        - rhv-engine
+
+    - add_host:
+        hostname: "baremetal04.ocp-on-ovirt.gcp.devcluster.openshift.com"
+        ansible_become: true
+        groups:
+        - rhv-node
+        - rhv-engine
+
+    - add_host:
+        hostname: "baremetal06.ocp-on-ovirt.gcp.devcluster.openshift.com"
+        ansible_become: true
+        groups:
+        - rhv-node
+        - rhv-engine
+
+
+  - hosts: rhv-host,rhv-node
+    tags: firewall
+    tasks:
+    - firewalld:
+        zone: public
+        permanent: true
+        state: enabled
+        port: 9100/tcp
+    - service:
+        name: firewalld
+        state: reloaded
+
+  - hosts: rhv-node,rhv-engine
+    tags: exporter
+    roles:
+      - ansible-node-exporter
+
