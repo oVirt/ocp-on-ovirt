@@ -85,6 +85,8 @@ spec:
           - mountPath: /etc/grafana/provisioning/datasources/custom.yaml
             name: grafana
             subPath: prometheus_ds.yaml
+          - mountPath: /var/lib/grafana
+            name: grafana-pvc
 
         - image: quay.io/prometheus/prometheus:latest
           imagePullPolicy: IfNotPresent
@@ -104,8 +106,12 @@ spec:
               port: 9090
             timeoutSeconds: 2
       volumes:
-      - emptyDir: {}
-        name: prom-volume-1
+      - name: grafana-pvc
+        persistentVolumeClaim:
+          claimName: grafana-db            
+      - name: prom-volume-1
+        persistentVolumeClaim:
+          claimName: prom-volume      
       - configMap:
           name: grafana
         name: grafana
