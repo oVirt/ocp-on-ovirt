@@ -11,6 +11,7 @@ import (
 
 	ovirtsdk4 "github.com/oVirt/go-ovirt"
 	log "github.com/sirupsen/logrus"
+	"net"
 )
 
 //Engine - engine SDK
@@ -164,6 +165,65 @@ func (e *Engine) AddComment(vmname string, comment string) {
 		Send()
 
 }
+
+
+func (e *Engine) GetVmIp(vmName string , subnetCIDR string) (string,error) {
+	//inputRawURL := "https://10.1.111.229/ovirt-engine/api"
+
+	vmsService := e.conn.SystemService().VmsService()
+	// Get the reference to the vm service for a particular vm:
+	// vmsService := conn.SystemService().VmsService()
+
+	_, subnet, _ := net.ParseCIDR(subnetCIDR)
+
+	//# Look up fot the vm by name:
+	vmResp, err := vmsService.List().Search(fmt.Sprintf("name=%s",vmName)).Send()
+	if err != nil {
+		fmt.Printf("Failed to search vm list, reason: %v\n", err)
+		return "",fmt.Errorf("aa")
+	}
+	vmSlice, _ := vmResp.Vms()
+	vm := vmSlice.Slice()[0]
+
+	// Get the reported-devices service for this vm:
+	reportedDevicesService := vmsService.VmService(vm.MustId()).ReportedDevicesService()
+
+	// Get the guest reported devices
+	reportedDeviceResp, err := reportedDevicesService.List().Send()
+	if err != nil {
+		fmt.Printf("Failed to get reported devices list, reason: %v\n", err)
+		return "",fmt.Errorf("aa")
+	}
+	reportedDeviceSlice, _ := reportedDeviceResp.ReportedDevice()
+
+	if len(reportedDeviceSlice.Slice())==0{
+		return "",fmt.Errorf("IPS not found")
+	}
+
+	for _, reportedDevice := range reportedDeviceSlice.Slice() {
+		ips := reportedDevice.MustIps()
+
+		if ips != nil {
+			//fmt.Printf("Got %d ips",len(ips.Slice()))
+			for _, ip := range ips.Slice() {
+				//fmt.Printf("%s ,%s",vmName,ip.MustAddress())
+				ipres := net.ParseIP(ip.MustAddress())
+				if ipres != nil {
+					if subnet.Contains(ipres){
+						//fmt.Printf("found ip address %s",ipres)
+						return ip.MustAddress(),nil
+					}
+				}
+
+			}
+		}
+	}
+
+	return "",nil
+
+}
+
+
 func (e *Engine) ListVMs() map[string]string {
 	// Get the reference to the "vms" service:
 	vmsService := e.conn.SystemService().VmsService()
