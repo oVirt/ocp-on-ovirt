@@ -47,9 +47,12 @@ data:
         # scheme defaults to 'http'.
 
         static_configs:
-        - targets: ['baremetal01.ocp-on-ovirt.gcp.devcluster.openshift.com:9100']        
+        - targets: ['baremetal01.ocp-on-ovirt.gcp.devcluster.openshift.com:9100']
         - targets: ['baremetal04.ocp-on-ovirt.gcp.devcluster.openshift.com:9100']
         - targets: ['baremetal06.ocp-on-ovirt.gcp.devcluster.openshift.com:9100']
+        - targets: ['baremetal07.ocp-on-ovirt.gcp.devcluster.openshift.com:9100']
+        - targets: ['baremetal08.ocp-on-ovirt.gcp.devcluster.openshift.com:9100']
+        - targets: ['baremetal09.ocp-on-ovirt.gcp.devcluster.openshift.com:9100']
 ---
 apiVersion: apps/v1
 kind: Deployment

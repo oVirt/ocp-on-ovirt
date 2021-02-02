@@ -30,6 +30,26 @@
         - rhv-node
         - rhv-engine
 
+    - add_host:
+        hostname: "baremetal07.ocp-on-ovirt.gcp.devcluster.openshift.com"
+        ansible_become: true
+        groups:
+        - rhv-node
+        - rhv-engine
+
+    - add_host:
+        hostname: "baremetal08.ocp-on-ovirt.gcp.devcluster.openshift.com"
+        ansible_become: true
+        groups:
+        - rhv-node
+        - rhv-engine
+
+    - add_host:
+        hostname: "baremetal09.ocp-on-ovirt.gcp.devcluster.openshift.com"
+        ansible_become: true
+        groups:
+        - rhv-node
+        - rhv-engine
 
   - hosts: rhv-host,rhv-node
     tags: firewall
