@@ -39,6 +39,7 @@ frontend ft_ssl_api
   tcp-request inspect-delay 5s
   tcp-request content accept if { req_ssl_hello_type 1 }
 
+
 {% for it in ocp_networks %}
 # configuration for {{ it.name }}
   acl sni-api-{{ it.name }} req_ssl_sni -i {{ it.api_fqdn }}
@@ -60,6 +61,21 @@ frontend ft_ssl_443
 {% endfor %}
 
   default_backend bk_ssl_default
+
+frontend ft_http_80
+  bind {{external_address}}:80
+  mode tcp
+{% for it in ocp_networks %}
+  acl http-apps-{{ it.name }} hdr(host) -m end {{ it.apps_fqdn }}
+  use_backend bk_apps_http-{{ it.name }} if http-apps-{{ it.name }}
+{% endfor %}
+
+
+{% for it in ocp_networks %}
+backend bk_apps_http-{{ it.name }}
+  mode tcp
+  server backend-apps-{{ it.name }} {{ it.router_internal_address}:80 check
+{% endfor %}
 
 {% for it in ocp_networks %}
 backend bk_apps-{{ it.name }}

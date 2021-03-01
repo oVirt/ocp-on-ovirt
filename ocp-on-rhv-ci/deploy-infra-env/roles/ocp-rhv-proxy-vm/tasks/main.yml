@@ -159,6 +159,7 @@
         - ssh
         - dhcp
         - dns
+        - http
         - https
         - dhcpv6-client
 
