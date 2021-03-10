@@ -1,0 +1,78 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: schedule-ovirt-daily-disk-cleanup-cronjob
+  namespace: ovirt
+spec:
+  schedule: "20 05 * * *"
+  concurrencyPolicy: "Replace"
+  startingDeadlineSeconds: 200
+  suspend: false
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  backoffLimit: 0
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          name: schedule-ovirt-daily-disk-cleanup-cronjob
+        spec:
+          backoffLimit: 0
+          containers:
+          - name: ovirt-engine-daily-cleaner
+            image: quay.io/eslutsky/ansible-runner
+            command:
+            - /bin/bash
+            - -c
+            - |
+              #!/bin/bash
+              set -euo pipefail
+
+              if [ `id -u` -ge 500 ]; then
+                  echo "runner:x:`id -u`:`id -g`:,,,:/runner:/bin/bash" > /tmp/passwd
+                  cat /tmp/passwd >> /etc/passwd
+                  rm /tmp/passwd
+              fi
+
+              mkdir -p ~/.ssh/
+              chmod 700 ~/.ssh/
+
+              cat <<__EOF__ >~/.ansible.cfg
+              [defaults]
+              host_key_checking = False
+              __EOF__
+
+              cat <<__EOF__ >>~/.ssh/config
+              Host *
+                StrictHostKeyChecking no
+              __EOF__
+              chmod 400 ~/.ssh/config
+
+              set -o allexport
+
+              source /etc/openshift-installer/ovirt.conf
+              cd /tmp/scripts
+              ansible-playbook remove_yesterday_disks.yaml
+
+            volumeMounts:
+            - name: config-gcp-secrets
+              mountPath: /runner/gcp-secrets
+            - name: shared-tmp
+              mountPath: /tmp/shared
+            - name: cluster-profile
+              mountPath: /etc/openshift-installer
+            - name: scripts
+              mountPath: /tmp/scripts
+          volumes:
+            - name: config-gcp-secrets
+              secret:
+                secretName: ovirt-infra-gcp-secrets
+            - name: shared-tmp
+              emptyDir: {}
+            - name: cluster-profile
+              secret:
+                secretName: cluster-secrets-ovirt
+            - name: scripts
+              configMap:
+                name: ocp-on-rhv-ci-scripts
+          restartPolicy: Never

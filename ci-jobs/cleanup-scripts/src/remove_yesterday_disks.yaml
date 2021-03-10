@@ -1,0 +1,58 @@
+---
+  - name: remove old resources from the oVirt CI engine
+    hosts: localhost
+    connection: local
+    vars:
+      max_hours: 3
+      
+    tasks:
+      - name: download CA file from engine
+        get_url:
+          url: "https://{{ lookup('env','OVIRT_ENGINE_URL') | urlsplit('hostname') }}/ovirt-engine/services/pki-resource?resource=ca-certificate&format=X509-PEM-CA"
+          dest: "/tmp/ca.pem"
+          validate_certs: no
+      - name: Login to RHV
+        ovirt_auth:
+          url: "{{ lookup('env','OVIRT_ENGINE_URL') }}"
+          username: "{{ lookup('env','OVIRT_ENGINE_USERNAME') }}"
+          password: "{{ lookup('env','OVIRT_ENGINE_PASSWORD') }}"
+          ca_file: "/tmp/ca.pem"
+          insecure: "true"
+        tags:
+          - always
+      - name: find all PVC disk events
+        ovirt_event_info:
+          search: 'message="The disk*pvc*" and time=yesterday'
+          auth: "{{ ovirt_auth }}"
+        register: result
+      - debug: msg="found Number of PVC events {{ result['ovirt_events'] | length }}"
+      - name: delete disk if its exists
+        include_tasks: delete_disk_if_older.yaml
+        vars:
+          disk_id: "{{ (item['description'] | regex_search('The disk (.+) was', '\\1') | first )[1:-1]}}"
+          create_time: "{{ item['time'] }}"
+        loop: "{{ result['ovirt_events'] }}"
+        when:
+            - "item['code']==2021"
+
+      - name: find all ovirt disk events
+        ovirt_event_info:
+          search: 'message="The disk*ovirt*" and time=yesterday'
+          auth: "{{ ovirt_auth }}"
+        register: result
+      - debug: msg="found Number of ovirt Disk events {{ result['ovirt_events'] | length }}"
+      - name: delete disk if its exists
+        include_tasks: delete_disk_if_older.yaml
+        vars:
+          disk_id: "{{ (item['description'] | regex_search('The disk (.+) was', '\\1') | first )[1:-1]}}"
+          create_time: "{{ item['time'] }}"
+        loop: "{{ result['ovirt_events'] }}"
+        when:
+            - "item['code']==2021"
+
+      - name: Logout from RHV
+        ovirt_auth:
+          state: absent
+          ovirt_auth: "{{ ovirt_auth }}"
+        tags:
+          - always

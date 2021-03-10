@@ -1,0 +1,5 @@
+- name: "removing disk - {{ disk_id }} - {{ create_time }} "
+  ovirt_disk:
+    auth: "{{ ovirt_auth }}"
+    state: absent
+    name: "{{ disk_id }}"
