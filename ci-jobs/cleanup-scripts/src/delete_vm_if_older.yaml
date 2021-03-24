@@ -1,0 +1,10 @@
+- set_fact:
+    seconds_since_creation: "{{(((engine_time|int)) - ( vm_creation_epoch | int ))/1000 }}"
+- set_fact: to_be_deleted="{{  seconds_since_creation | int  >= seconds_limit | int }}"
+- debug: msg="{{ 'seconds_since_creation:' + seconds_since_creation +' id:' + vm_id + ' name:' + vm_name +' vm_creation_epoch:' + vm_creation_epoch + ' to_be_deleted:' + ( to_be_deleted | string ) }}"
+- name: "removing VM - {{ vm_name }}} "
+  ovirt_vm:
+    auth: "{{ ovirt_auth }}"
+    state: absent
+    name: "{{ vm_name }}"
+  when: to_be_deleted
