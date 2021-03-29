@@ -6,13 +6,24 @@
       max_hours: 10
       vms_to_exclude:
         - proxy-vm
-        - ovirt-proxy-VM
-        - upi-proxy-vm
-
-      templates_to_exclude_regex: ovirt1.*
       templates_to_exclude_list:
         - Blank
         - centos-7
+    pre_tasks:
+      - name: download CA file from engine
+        get_url:
+          url: "https://{{ lookup('env','OVIRT_ENGINE_URL') | urlsplit('hostname') }}/ovirt-engine/services/pki-resource?resource=ca-certificate&format=X509-PEM-CA"
+          dest: "/tmp/ca.pem"
+          validate_certs: no
+      - name: Login to RHV
+        ovirt_auth:
+          url: "{{ lookup('env','OVIRT_ENGINE_URL') }}"
+          username: "{{ lookup('env','OVIRT_ENGINE_USERNAME') }}"
+          password: "{{ lookup('env','OVIRT_ENGINE_PASSWORD') }}"
+          ca_file: "/tmp/ca.pem"
+          insecure: "true"
+        tags:
+          - always
     tasks:
       - name: collect engine general info
         uri:
@@ -20,7 +31,6 @@
           method: GET
           user: "{{ lookup('env','OVIRT_ENGINE_USERNAME') }}"
           password: "{{ lookup('env','OVIRT_ENGINE_PASSWORD') }}"
-
           body_format: json
           status_code: 200
           validate_certs: no
@@ -28,13 +38,13 @@
             Content-Type: "application/json"
             Accept: "application/json"
         register: token_json
+
       - name: collect VM information using engine API
         uri:
           url: "{{ lookup('env','OVIRT_ENGINE_URL') }}/vms"
           method: GET
           user: "{{ lookup('env','OVIRT_ENGINE_USERNAME') }}"
           password: "{{ lookup('env','OVIRT_ENGINE_PASSWORD') }}"
-
           body_format: json
           status_code: 200
           validate_certs: no
@@ -42,7 +52,7 @@
             Content-Type: "application/json"
             Accept: "application/json"
         register: vms_json
-        
+
       - name: delete old vms
         include_tasks: delete_vm_if_older.yaml
         vars:
@@ -53,3 +63,8 @@
           vm_name: "{{ item['name'] }}"
         loop: "{{ vms_json.json.vm }}"
         when: "item['name'] not in vms_to_exclude"
+    post_tasks:
+      - name: Logout from RHV
+        ovirt_auth:
+          state: absent
+          ovirt_auth: "{{ ovirt_auth }}"
