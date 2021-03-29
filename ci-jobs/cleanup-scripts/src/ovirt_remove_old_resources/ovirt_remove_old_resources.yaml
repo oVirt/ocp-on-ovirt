@@ -6,7 +6,7 @@
       max_hours: 5
       vms_to_exclude:
         - proxy-vm
-      templates_to_exclude_list:
+      templates_to_exclude:
         - Blank
         - centos-7
     pre_tasks:
@@ -22,6 +22,9 @@
           password: "{{ lookup('env','OVIRT_ENGINE_PASSWORD') }}"
           ca_file: "/tmp/ca.pem"
           insecure: "true"
+          headers:
+            Content-Type: "application/json"
+            Accept: "application/json"
         tags:
           - always
     tasks:
@@ -63,6 +66,32 @@
           vm_name: "{{ item['name'] }}"
         loop: "{{ vms_json.json.vm }}"
         when: "item['name'] not in vms_to_exclude"
+
+      - name: collect templates information using engine API
+        uri:
+          url: "{{ lookup('env','OVIRT_ENGINE_URL') }}/templates"
+          method: GET
+          user: "{{ lookup('env','OVIRT_ENGINE_USERNAME') }}"
+          password: "{{ lookup('env','OVIRT_ENGINE_PASSWORD') }}"
+          body_format: json
+          status_code: 200
+          validate_certs: no
+          headers:
+            Content-Type: "application/json"
+            Accept: "application/json"
+        register: templates_json
+
+      - name: delete old templates
+        include_tasks: delete_template_if_older.yaml
+        vars:
+          template_creation_epoch: "{{ item['creation_time'] | int }}"
+          engine_time: "{{token_json.json.time | int}}"
+          seconds_limit: "{{ max_hours*3600  }}"
+          template_id: "{{ item['id'] }}"
+          template_name: "{{ item['name'] }}"
+        loop: "{{ templates_json.json.template }}"
+        when: "item['name'] not in templates_to_exclude"
+
     post_tasks:
       - name: Logout from RHV
         ovirt_auth:

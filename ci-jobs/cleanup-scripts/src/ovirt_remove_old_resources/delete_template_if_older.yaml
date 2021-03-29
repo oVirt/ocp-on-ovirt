@@ -1,0 +1,11 @@
+- set_fact:
+    seconds_since_creation: "{{(((engine_time|int)) - ( template_creation_epoch | int ))/1000 }}"
+- set_fact: to_be_deleted="{{  seconds_since_creation | int  >= seconds_limit | int }}"
+- debug: msg="{{ 'seconds_since_creation:' + seconds_since_creation +' id:' + template_id + ' name:' + template_name +' template_creation_epoch:' + template_creation_epoch + ' to_be_deleted:' + ( to_be_deleted | string ) }}"
+- name: "removing template - {{ template_name }} "
+  ovirt_template:
+    auth: "{{ ovirt_auth }}"
+    state: absent
+    name: "{{ template_name }}"
+  ignore_errors: yes
+  when: to_be_deleted
