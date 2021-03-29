@@ -3,7 +3,7 @@
     hosts: localhost
     connection: local
     vars:
-      max_hours: 10
+      max_hours: 5
       vms_to_exclude:
         - proxy-vm
       templates_to_exclude_list:
