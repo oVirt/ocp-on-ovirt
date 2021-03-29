@@ -28,5 +28,4 @@ Under the openshift organization we have various github repos and each merged PR
 
 ## Important note
 
-This tool will work only one PRs that are newlly merged PRs and have releases on Openshift release page that don't contain them. The reason is that this tool is a web crawler that automate the manualy process so if the PR is old then all the release will contain it, and it will not find it in any release page. In the future I will add logic to inform the user in that case.
-
+This tool will work only one PRs that are newly merged PRs and have releases on Openshift release page that contain them. The reason is that this tool is a web crawler that automate the manual process so if the PR is old then it will not be on the release page.

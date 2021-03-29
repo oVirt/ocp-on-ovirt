@@ -1,0 +1,64 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    job-name: ovirt-release-image
+  name: ovirt-release-image
+  namespace: ovirt
+spec:
+  backoffLimit: 6
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      labels:
+        job-name: ovirt-release-image
+      name: ovirt-release-image
+    spec:
+      containers:
+      - name: setup
+        image: quay.io/openshift/origin-cli:latest
+        env:
+        - name: RELEASE
+          value: registry.ci.openshift.org/ocp/release:4.8
+        - name: PUSH_TAG
+          value: affinity-group
+        command:
+        - /bin/sh
+        - -c
+        - |
+          mkdir -p /tmp/artifacts
+          cd /tmp/artifacts
+          OCDO=quay.io/gzaidman/cluster-api-provider-ovirt:affinity-group
+
+          cp /etc/openshift-installer/pull-secret /tmp/artifacts/pull-secret
+
+          oc registry login --to /tmp/artifacts/pull-secret
+
+          oc adm release new -n ovirt \
+          --registry-config=/tmp/artifacts/pull-secret \
+          --from-release ${RELEASE} \
+          --to-image registry.svc.ci.openshift.org/ovirt/ovirt-release:"${PUSH_TAG}" \
+          ovirt-machine-controllers=${OCDO}
+        imagePullPolicy: IfNotPresent
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: FallbackToLogsOnError
+        volumeMounts:
+        - mountPath: /tmp
+          name: shared-tmp
+        - mountPath: /etc/openshift-installer
+          name: cluster-profile
+      dnsPolicy: ClusterFirst
+      restartPolicy: Never
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      serviceAccount: builder
+      volumes:
+      - emptyDir: {}
+        name: shared-tmp
+      - emptyDir: {}
+        name: artifacts
+      - name: cluster-profile
+        secret:
+          defaultMode: 420
+          secretName: cluster-secrets-ovirt
