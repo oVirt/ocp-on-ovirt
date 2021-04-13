@@ -74,7 +74,7 @@ frontend ft_http_80
 {% for it in ocp_networks %}
 backend bk_apps_http-{{ it.name }}
   mode tcp
-  server backend-apps-{{ it.name }} {{ it.router_internal_address}:80 check
+  server backend-apps-{{ it.name }} {{ it.router_internal_address }}:80 check
 {% endfor %}
 
 {% for it in ocp_networks %}
