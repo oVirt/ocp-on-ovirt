@@ -6,7 +6,7 @@ RUN hack/build.sh
 
 
 #FROM registry.svc.ci.openshift.org/origin/4.1:base
-FROM centos:8
+FROM quay.io/centos/centos:8
 COPY --from=builder /go/src/github.com/oVirt/ocp-on-ovirt/ocp-on-rhv-ci/tools/ovirtci/prFinder /bin/prFinder
 RUN mkdir /output && chown 1000:1000 /output
 USER 1000:1000
