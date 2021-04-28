@@ -87,7 +87,7 @@ func (e *Engine) GetLastPRForCluster(cluster string) string {
 			//clusterStatus := strings.TrimSpace(fdata[2])
 			clusterid := strings.TrimSpace(fdata[1])
 			jobtype := data["type"]
-			prowjobid := data["prowjobid"]
+			prowjob := data["job"]
 
 			//log.Printf("AAA %s", data["refs"])
 			//if data["refs"] == nil {
@@ -97,7 +97,7 @@ func (e *Engine) GetLastPRForCluster(cluster string) string {
 			var prLink interface{}
 
 			if jobtype != "presubmit" {
-				prLink = fmt.Sprintf("Release: %s", prowjobid)
+				prLink = fmt.Sprintf("Job: %s", prowjob)
 			} else {
 				prLink = data["refs"].(map[string]interface{})["pulls"].([]interface{})[0].(map[string]interface{})["link"]
 			}
