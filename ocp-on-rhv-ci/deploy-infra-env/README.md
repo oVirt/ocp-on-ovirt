@@ -74,7 +74,7 @@ Each stage can be run separately using ansible tag or everything can run in one 
   
   to verify that the rhv host is succefully connected to the centralized OVN switch examine the log: `/var/log/openvswitch/ovn-controller.log` on the rhv Host.
   ```
-  2021-05-19T13:56:39.844Z|00007|reconnect|INFO|ssl:169.63.244.91:6642: connected
+  2021-05-19T13:56:39.844Z|00007|reconnect|INFO|ssl:<engine-ip-address>:6642: connected
   2021-05-19T13:56:39.872Z|00008|ofctrl|INFO|unix:/var/run/openvswitch/br-int.mgmt: connecting to switch
   2021-05-19T13:56:39.872Z|00009|rconn|INFO|unix:/var/run/openvswitch/br-int.mgmt: connecting...
   2021-05-19T13:56:39.872Z|00010|rconn|WARN|unix:/var/run/openvswitch/br-int.mgmt: connection failed (No such file or directory)
