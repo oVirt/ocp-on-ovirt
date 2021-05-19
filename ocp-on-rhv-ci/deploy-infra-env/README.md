@@ -72,8 +72,7 @@ Each stage can be run separately using ansible tag or everything can run in one 
   ```
   note: this playbook needs to  run every time new hosts is added to the cluster.
   
-  to verify that the rhv host is succefully connected to the centralizaed OVN switch examine below log on the host,
-  from the log: `/var/log/openvswitch/ovn-controller.log`
+  to verify that the rhv host is succefully connected to the centralized OVN switch examine the log: `/var/log/openvswitch/ovn-controller.log` on the rhv Host.
   ```
   2021-05-19T13:56:39.844Z|00007|reconnect|INFO|ssl:169.63.244.91:6642: connected
   2021-05-19T13:56:39.872Z|00008|ofctrl|INFO|unix:/var/run/openvswitch/br-int.mgmt: connecting to switch
