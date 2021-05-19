@@ -80,4 +80,5 @@ Each stage can be run separately using ansible tag or everything can run in one 
   2021-05-19T13:56:39.872Z|00010|rconn|WARN|unix:/var/run/openvswitch/br-int.mgmt: connection failed (No such file or directory)
   2021-05-19T13:56:39.872Z|00011|rconn|INFO|unix:/var/run/openvswitch/br-int.mgmt: waiting 1 seconds before reconnect
   2021-05-19T13:56:40.873Z|00012|rconn|INFO|unix:/var/run/openvswitch/br-int.mgmt: connecting...
+  2021-05-19T13:56:40.902Z|00003|rconn(ovn_pinctrl0)|INFO|unix:/var/run/openvswitch/br-int.mgmt: connected
   ```
