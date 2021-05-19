@@ -70,3 +70,4 @@ Each stage can be run separately using ansible tag or everything can run in one 
   cp /usr/share/ovirt-engine/playbooks/ovirt-provider-ovn-driver.yml .
   ansible-playbook --key-file /etc/pki/ovirt-engine/keys/engine_id_rsa -i /usr/share/ovirt-engine-metrics/bin/ovirt-engine-hosts-ansible-inventory --extra-vars " cluster_name=<CLUSTER_NAME> ovn_central=<ENGINE-IP> ovn_tunneling_interface=ovirtmgmt" ovirt-provider-ovn-driver.yml
   ```
+  note: this playbook needs to  run every time new hosts is added to the cluster.
