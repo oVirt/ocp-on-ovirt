@@ -71,3 +71,14 @@ Each stage can be run separately using ansible tag or everything can run in one 
   ansible-playbook --key-file /etc/pki/ovirt-engine/keys/engine_id_rsa -i /usr/share/ovirt-engine-metrics/bin/ovirt-engine-hosts-ansible-inventory --extra-vars " cluster_name=<CLUSTER_NAME> ovn_central=<ENGINE-IP> ovn_tunneling_interface=ovirtmgmt" ovirt-provider-ovn-driver.yml
   ```
   note: this playbook needs to  run every time new hosts is added to the cluster.
+  
+  to verify that the rhv host is succefully connected to the centralizaed OVN switch examine below log on the host,
+  from the log: `/var/log/openvswitch/ovn-controller.log`
+  ```
+  2021-05-19T13:56:39.844Z|00007|reconnect|INFO|ssl:169.63.244.91:6642: connected
+  2021-05-19T13:56:39.872Z|00008|ofctrl|INFO|unix:/var/run/openvswitch/br-int.mgmt: connecting to switch
+  2021-05-19T13:56:39.872Z|00009|rconn|INFO|unix:/var/run/openvswitch/br-int.mgmt: connecting...
+  2021-05-19T13:56:39.872Z|00010|rconn|WARN|unix:/var/run/openvswitch/br-int.mgmt: connection failed (No such file or directory)
+  2021-05-19T13:56:39.872Z|00011|rconn|INFO|unix:/var/run/openvswitch/br-int.mgmt: waiting 1 seconds before reconnect
+  2021-05-19T13:56:40.873Z|00012|rconn|INFO|unix:/var/run/openvswitch/br-int.mgmt: connecting...
+  ```
