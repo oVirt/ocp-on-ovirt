@@ -2,7 +2,7 @@
 
 ## Setup user and group on oVirt
 
-The ansible playbook [ovirt_ocp_user-setup.yml](ovirt_ocp_user-setup.yml) helps to setup
+The ansible playbook [ovirt_ocpadmin_user-setup.yml](ovirt_ocpadmin_user-setup.yml) helps to setup
 a user and group with the minimum privileges to run the *openshift-install* on ovirt.
 
 Before running the playbook the following variables should be exported
