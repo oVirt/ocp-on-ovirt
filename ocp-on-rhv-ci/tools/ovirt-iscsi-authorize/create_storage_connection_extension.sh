@@ -3,17 +3,49 @@
 base_url="https://fqdn/ovirt-engine/api"
 user="admin@internal"
 password="pass"
+listAllHosts(){
+ 
+    stdout=$(curl \
+    --insecure \
+    --request GET \
+    --header "Accept: application/json" \
+    --header "Content-Type: application/json" \
+    --user "${user}:${password}" \
+    $base_url/hosts/ | jq -r '.[][].id') 
 
+    echo $stdout
+
+}
 
 listStorageConnectionExtensions() {
     host_id=$1
-    curl \
+    stdout=$(curl \
     --insecure \
     --request GET \
-    --header "Accept: application/xml" \
-    --header "Content-Type: application/xml" \
+    --header "Accept: application/json" \
+    --header "Content-Type: application/json" \
     --user "${user}:${password}" \
-    $base_url/hosts/${host_id}/storageconnectionextensions
+    $base_url/hosts/${host_id}/storageconnectionextensions | jq -r '.[][].id')
+
+    echo $stdout
+}
+
+deleteAllHostsExtensions(){
+    for line in $(listAllHosts) ; do
+        echo "deleting extensions for host $line"
+        deleteAllExtensions "$line"
+    done
+}
+
+
+deleteAllExtensions(){
+    hostId=$1
+
+    for line in $(listStorageConnectionExtensions "$hostId") ; do 
+
+    echo "aa $line "
+    deleteStorageConnectionExtensions "$hostId" "$line"
+    done
 }
 
 addStorageConnectionExtensions(){
