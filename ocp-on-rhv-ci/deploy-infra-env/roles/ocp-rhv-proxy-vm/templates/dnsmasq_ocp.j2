@@ -1,0 +1,12 @@
+strict-order
+pid-file=/var/run/net-0.pid
+except-interface=lo
+bind-dynamic
+interface=eth0
+log-queries
+domain={{ base_domain }}
+dhcp-leasefile=/var/lib/dnsmasq/net-0.leases
+{% for it in ocp_networks %}
+address=/{{ it.api_fqdn }}/{{ it.api_internal_address }}
+address=/.{{ it.apps_fqdn }}/{{ it.router_internal_address }}
+{% endfor %}

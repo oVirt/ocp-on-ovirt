@@ -18,7 +18,6 @@ ocp_networks:
 - nic: eth1
   name: net-10
   dhcp_range: 192.168.210.101,192.168.210.150,5m
-  dns: 8.8.8.8
   address: 192.168.210.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.210.32
@@ -28,7 +27,6 @@ ocp_networks:
 - nic: eth2
   name: net-11
   dhcp_range: 192.168.211.101,192.168.211.150,5m
-  dns: 8.8.8.8
   address: 192.168.211.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.211.32
@@ -38,7 +36,6 @@ ocp_networks:
 - nic: eth3
   name: net-12
   dhcp_range: 192.168.212.101,192.168.212.150,5m
-  dns: 8.8.8.8
   address: 192.168.212.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.212.32
@@ -48,7 +45,6 @@ ocp_networks:
 - nic: eth4
   name: net-13
   dhcp_range: 192.168.213.101,192.168.213.150,5m
-  dns: 8.8.8.8
   address: 192.168.213.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.213.32
@@ -58,7 +54,6 @@ ocp_networks:
 - nic: eth5
   name: net-14
   dhcp_range: 192.168.214.101,192.168.214.150,5m
-  dns: 8.8.8.8
   address: 192.168.214.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.214.32
@@ -68,7 +63,6 @@ ocp_networks:
 - nic: eth6
   name: net-15
   dhcp_range: 192.168.215.101,192.168.215.150,5m
-  dns: 8.8.8.8
   address: 192.168.215.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.215.32
@@ -78,7 +72,6 @@ ocp_networks:
 - nic: eth7
   name: net-16
   dhcp_range: 192.168.216.101,192.168.216.150,5m
-  dns: 8.8.8.8
   address: 192.168.216.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.216.32
@@ -88,7 +81,6 @@ ocp_networks:
 - nic: eth8
   name: net-17
   dhcp_range: 192.168.217.101,192.168.217.150,5m
-  dns: 8.8.8.8
   address: 192.168.217.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.217.32
@@ -98,7 +90,6 @@ ocp_networks:
 - nic: eth9
   name: net-18
   dhcp_range: 192.168.218.101,192.168.218.150,5m
-  dns: 8.8.8.8
   address: 192.168.218.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.218.32

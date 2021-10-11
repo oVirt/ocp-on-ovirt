@@ -33,7 +33,7 @@ defaults
   log global
 
 frontend ft_ssl_api
-  bind {{external_address}}:6443
+  bind {{collected_address}}:6443
 
   mode tcp
   tcp-request inspect-delay 5s
@@ -49,7 +49,7 @@ frontend ft_ssl_api
   default_backend bk_ssl_default
 
 frontend ft_ssl_443
-  bind {{external_address}}:443
+  bind {{collected_address}}:443
 
   mode tcp
   tcp-request inspect-delay 5s
@@ -63,7 +63,7 @@ frontend ft_ssl_443
   default_backend bk_ssl_default
 
 frontend ft_http_80
-  bind {{external_address}}:80
+  bind {{collected_address}}:80
   mode tcp
 {% for it in ocp_networks %}
   acl http-apps-{{ it.name }} hdr(host) -m end {{ it.apps_fqdn }}

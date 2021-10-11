@@ -1,0 +1,34 @@
+
+---
+  - name: create ocp-for-rhv CI env
+    hosts: localhost
+
+    vars:
+      ovirt_engine_url: "{{ lookup('env','OVIRT_ENGINE_URL') }}"
+      ovirt_engine_username: "{{ lookup('env','OVIRT_ENGINE_USERNAME') }}"
+      ovirt_engine_password: "{{ lookup('env','OVIRT_ENGINE_PASSWORD') }}"
+      ovirt_engine_hostname: "{{ ovirt_engine_url | urlsplit('hostname') }}"
+      cluster_name: "{{cluster_name}}"
+
+    pre_tasks:
+      - name: login to ovirt
+        import_tasks: login_to_ovirt.yml
+        tags: always
+
+      - name: Add the engine to inventory
+        add_host:
+          hostname: "{{ ovirt_engine_hostname }}"
+          name: engine
+          ansible_ssh_host: "{{ ovirt_engine_hostname }}"
+          #ansible_ssh_user: root
+          become: yes
+
+    tasks:
+    #create oVirt OVN networks for running OCP VMs.
+      - name: remove VM with cloud init
+        ovirt_vm:
+          name: proxy-vm
+          auth: "{{ovirt_auth}}"
+          state: absent
+        delegate_to: localhost
+
