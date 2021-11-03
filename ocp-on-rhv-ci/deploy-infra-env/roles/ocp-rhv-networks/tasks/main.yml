@@ -65,5 +65,31 @@
     - token_json.json.access
     with_items: "{{neutron_networks.json.networks}}"
 
+  - name: list all the OVN ports
+    uri:
+      url: "{{neutron_api}}/ports.json"
+      method: GET
+      headers:
+        X-Auth-Token: "{{ token_json.json.access.token.id }}"
+      status_code: 200
+      validate_certs: no
+    register: neutron_ports
+    when:
+    - token_json.json.access
 
-
+  - name: disable port security for each port
+    uri:
+      url: "{{neutron_api}}/ports/{{ item.id }}"
+      method: PUT
+      body:
+        port:
+          port_security_enabled: False
+      body_format: json
+      headers:
+        X-Auth-Token: "{{ token_json.json.access.token.id }}"
+      status_code: 200
+      validate_certs: no
+    when:
+    - token_json.json.access
+    with_items: "{{neutron_ports.json.ports}}"
+    
