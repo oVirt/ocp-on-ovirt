@@ -1,0 +1,8 @@
+{
+  "ovirt_apivip": "192.168.220.30",
+  "ovirt_dnsvip": "192.168.220.31",
+  "ovirt_ingressvip": "192.168.220.32",
+  "cluster_name": "ovirt20",
+  "ovirt_network_name": "ovn-vmnet-20",
+  "ovirt_storage_domain_id": "400fda00-7e3d-49fd-ad35-315bf2df6292"
+}

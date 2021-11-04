@@ -1,0 +1,10 @@
+{
+  "conformance_worker_cpu": "8",
+  "conformance_worker_mem": "16384",
+  "conformance_master_cpu": "8",
+  "conformance_master_mem": "16384",
+  "minimal_worker_cpu": "4",
+  "minimal_worker_mem": "10240",
+  "minimal_master_cpu": "4",
+  "minimal_master_mem": "10240"
+}
