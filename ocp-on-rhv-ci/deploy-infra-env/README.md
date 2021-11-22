@@ -10,7 +10,7 @@
     - 20VCPUs
 - DC with Attached Storage at least 100GB (not production)
 - create ssh public key under user ~/.ssh/id_rsa.pub
-## Network Diagram
+## CI Infra Network Diagram
 ![diagram](./ocp-on-rhv-ovn.drawio.png)
 
 
