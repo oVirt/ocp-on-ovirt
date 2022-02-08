@@ -76,7 +76,27 @@
     name: "{{item.nic}}"
     network: "ovn-vm{{item.name}}"
   with_items: "{{ocp_networks}}"
+  register: nic_info
   delegate_to: localhost
+
+
+- debug:
+    var: nic_info
+
+- pause: 
+    seconds: 3
+
+- name: create nic persistent rules
+  lineinfile:
+    path: "/usr/lib/udev/rules.d/60-net.rules"
+    regexp: "{{ item.nic.mac.address }}"
+    line: 'ACTION=="add", SUBSYSTEM=="net", DRIVERS=="?*", ATTR{address}=="{{item.nic.mac.address}}", NAME="{{item.item.nic}}"'
+    create: yes
+  with_items: "{{nic_info.results}}"
+
+
+- name: Trigger Adding new persistent nics
+  command: /sbin/udevadm trigger --type=devices --action=add
 
 - name: create internal nics
   copy:
@@ -125,22 +145,6 @@
 
 - name: deploy ocp DNS resolver
   block:
-    - name: prepend localresolver to /etc/resolv.conf
-      blockinfile:
-        path: /etc/dhcp/dhclient.conf
-        content: |
-          interface "eth0" {
-          prepend domain-name-servers {{ collected_address  }};
-          }
-   
-    - name: Restart network
-      service:
-        name: network
-        state: restarted     
-
-    - gather_facts:
-    - set_fact: external_dns_record="{{ ansible_facts['dns']['nameservers'][1]}}"
-
     - template:
         src: dnsmasq_ocp.j2
         dest: /var/lib/dnsmasq/dnsmasq-net-0.conf
@@ -153,8 +157,20 @@
         state: started
         enabled: true
     
-     
-  when: ocp_dns is true
+    - name: prepend localresolver to /etc/resolv.conf
+      blockinfile:
+        path: /etc/dhcp/dhclient.conf
+        content: |
+          interface "eth0" {
+          prepend domain-name-servers {{ collected_address  }};
+          }
+    - name: Restart network
+      service:
+        name: network
+        state: restarted          
+
+
+  when: ocp_dns
 
 - name: create dnsmasq configuration for network
   copy:
