@@ -125,6 +125,22 @@
 
 - name: deploy ocp DNS resolver
   block:
+    - name: prepend localresolver to /etc/resolv.conf
+      blockinfile:
+        path: /etc/dhcp/dhclient.conf
+        content: |
+          interface "eth0" {
+          prepend domain-name-servers {{ collected_address  }};
+          }
+   
+    - name: Restart network
+      service:
+        name: network
+        state: restarted     
+
+    - gather_facts:
+    - set_fact: external_dns_record="{{ ansible_facts['dns']['nameservers'][1]}}"
+
     - template:
         src: dnsmasq_ocp.j2
         dest: /var/lib/dnsmasq/dnsmasq-net-0.conf
@@ -137,19 +153,7 @@
         state: started
         enabled: true
     
-    - name: prepend localresolver to /etc/resolv.conf
-      blockinfile:
-        path: /etc/dhcp/dhclient.conf
-        content: |
-          interface "eth0" {
-          prepend domain-name-servers {{ collected_address  }};
-          }
-    - name: Restart network
-      service:
-        name: network
-        state: restarted          
-
-
+     
   when: ocp_dns is true
 
 - name: create dnsmasq configuration for network

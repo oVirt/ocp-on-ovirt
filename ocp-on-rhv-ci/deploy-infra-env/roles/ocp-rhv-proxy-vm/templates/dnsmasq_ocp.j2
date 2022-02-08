@@ -4,6 +4,7 @@ except-interface=lo
 bind-dynamic
 interface=eth0
 log-queries
+local={{ external_dns_record }}
 domain={{ base_domain }}
 dhcp-leasefile=/var/lib/dnsmasq/net-0.leases
 {% for it in ocp_networks %}
