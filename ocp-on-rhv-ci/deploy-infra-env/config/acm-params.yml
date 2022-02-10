@@ -23,7 +23,7 @@ ocp_network_profile: ovn-vmnet-10
 ocp_networks:
 - nic: net0
   name: net-10
-  dhcp_range: 192.168.210.101,192.168.210.150,5m
+  dhcp_range: 192.168.210.101,192.168.210.150,15m
   address: 192.168.210.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.210.32
@@ -32,7 +32,7 @@ ocp_networks:
   apps_fqdn: apps.rhv-cluster-01.cicd.red-chesterfield.com
 - nic: net1
   name: net-11
-  dhcp_range: 192.168.211.101,192.168.211.150,5m
+  dhcp_range: 192.168.211.101,192.168.211.150,15m
   address: 192.168.211.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.211.32
@@ -41,7 +41,7 @@ ocp_networks:
   apps_fqdn: apps.rhv-cluster-01.cicd.red-chesterfield.com
 - nic: net2
   name: net-12
-  dhcp_range: 192.168.212.101,192.168.212.150,5m
+  dhcp_range: 192.168.212.101,192.168.212.150,15m
   address: 192.168.212.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.212.32
@@ -50,7 +50,7 @@ ocp_networks:
   apps_fqdn: apps.rhv-cluster-02.cicd.red-chesterfield.com
 - nic: net3
   name: net-13
-  dhcp_range: 192.168.213.101,192.168.213.150,5m
+  dhcp_range: 192.168.213.101,192.168.213.150,15m
   address: 192.168.213.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.213.32
@@ -59,7 +59,7 @@ ocp_networks:
   apps_fqdn: apps.rhv-cluster-03.cicd.red-chesterfield.com
 - nic: net4
   name: net-14
-  dhcp_range: 192.168.214.101,192.168.214.150,5m
+  dhcp_range: 192.168.214.101,192.168.214.150,15m
   address: 192.168.214.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.214.32
@@ -68,7 +68,7 @@ ocp_networks:
   apps_fqdn: apps.rhv-cluster-04.cicd.red-chesterfield.com
 - nic: net5
   name: net-15
-  dhcp_range: 192.168.215.101,192.168.215.150,5m
+  dhcp_range: 192.168.215.101,192.168.215.150,15m
   address: 192.168.215.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.215.32
@@ -77,7 +77,7 @@ ocp_networks:
   apps_fqdn: apps.rhv-cluster-05.cicd.red-chesterfield.com
 - nic: net6
   name: net-16
-  dhcp_range: 192.168.216.101,192.168.216.150,5m
+  dhcp_range: 192.168.216.101,192.168.216.150,15m
   address: 192.168.216.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.216.32
@@ -86,7 +86,7 @@ ocp_networks:
   apps_fqdn: apps.rhv-cluster-06.cicd.red-chesterfield.com
 - nic: net7
   name: net-17
-  dhcp_range: 192.168.217.101,192.168.217.150,5m
+  dhcp_range: 192.168.217.101,192.168.217.150,15m
   address: 192.168.217.1
   netmask: 255.255.255.0
   router_internal_address: 192.168.217.32
