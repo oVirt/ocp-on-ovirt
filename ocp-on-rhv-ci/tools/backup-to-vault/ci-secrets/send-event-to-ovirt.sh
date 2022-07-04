@@ -7,6 +7,13 @@ if [ "$#" -eq 1  ] ; then
     install_phase=$1
 fi
 
+echo "Checking ovirt-engine ovirt-imageio-proxy"
+curl --insecure \
+--connect-timeout 2 \
+--max-time 10 \
+--retry 5  \
+https://ovirt-engine.ocp-on-ovirt.gcp.devcluster.openshift.com:54323 -vv || true
+
 #take the last 7 chars from the id and convert it to int
 printf -v build_id '%d\n' $((10#${build_id: -7})) # ${build_id: -7}
 epoch=$(date +'%s')

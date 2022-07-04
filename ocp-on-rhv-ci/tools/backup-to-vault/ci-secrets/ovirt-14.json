@@ -4,5 +4,6 @@
   "ovirt_ingressvip": "192.168.214.32",
   "cluster_name": "ovirt14",
   "ovirt_network_name": "ovn-vmnet-14",
-  "ovirt_storage_domain_id": "400fda00-7e3d-49fd-ad35-315bf2df6292"
+  "ovirt_storage_domain_id": "400fda00-7e3d-49fd-ad35-315bf2df6292",
+  "machine_network_cidr": "192.168.0.0/16"
 }

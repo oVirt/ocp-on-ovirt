@@ -1,0 +1,7 @@
+.env*
+ocp-on-rhv-ci/tools/backup-to-vault/ci-secrets/pull-secret
+ocp-on-rhv-ci/tools/backup-to-vault/ci-secrets/ovirt.conf
+ocp-on-rhv-ci/tools/backup-to-vault/ci-secrets/pull-secret-old
+ocp-on-rhv-ci/tools/backup-to-vault/ci-secrets/ssh-privatekey
+ocp-on-rhv-ci/tools/backup-to-vault/ci-secrets/ssh-publickey
+ocp-on-rhv-ci/tools/backup-to-vault/ci-secrets/recreate-engine-iscsi-storage-extensions.sh
