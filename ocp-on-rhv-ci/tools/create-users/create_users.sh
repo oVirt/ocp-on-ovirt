@@ -1,6 +1,6 @@
 #!/bin/bash
 
-users=(eslutsky rgolangh gzaidman dfediuck)
+users=(eslutsky janosdebugs engelmi)
 
 for user in ${users[@]} ; do
 echo -e "adding user $user \n"
