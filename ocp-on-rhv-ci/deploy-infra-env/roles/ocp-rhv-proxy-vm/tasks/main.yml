@@ -30,7 +30,6 @@
              nameserver 8.8.8.8
            path: /etc/resolv.conf
            permissions: '0622'
-      nic_on_boot: true
       host_name: "{{external_hostname | default(omit)}}"
       user_name: root
   delegate_to: localhost

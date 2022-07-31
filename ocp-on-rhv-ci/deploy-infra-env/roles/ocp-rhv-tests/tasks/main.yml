@@ -9,10 +9,9 @@
     auth: "{{ovirt_auth}}"
     memory: 1GiB
     state: running
-    host: baremetal01
     nics:
       - name: eth0
-        profile_name: ovn-vmnet-18
+        profile_name: ovn-vmnet-10
 
     cloud_init:
       authorized_ssh_keys: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
@@ -23,22 +22,7 @@
       user_name: root
       root_password: "{{root_password | default(omit)}}"
 
-
-- name: wait until IP is reported to the engine
-  ovirt_vm_facts:
-    auth: '{{ ovirt_auth }}'
-    pattern: 'name=test-vm'
-    fetch_nested: true
-    nested_attributes: ips
-  #no_log: true
-  register: vm_facts
-  until: vm_facts.ansible_facts.ovirt_vms[0]['reported_devices'] | list | length > 0
-  retries: 5
-  delay: 60
-
-- debug: msg="{{ vm_facts.ansible_facts.ovirt_vms[0]['reported_devices'] }}"
-- set_fact: test_vm_ip="{{ vm_facts.ansible_facts.ovirt_vms[0]['reported_devices'][0]['ips'] |  selectattr("version", "equalto", "v4") | map(attribute='address') | list | first }}"
-- debug: msg="{{ test_vm_ip }}"
+- include_tasks: wait_until_reachable.yml
 
 - name: Add a host alias that we reach through a tunnel
   add_host:

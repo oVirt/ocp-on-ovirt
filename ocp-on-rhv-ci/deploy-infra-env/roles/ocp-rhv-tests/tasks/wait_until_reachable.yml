@@ -1,0 +1,48 @@
+- name: query VM Nics until reported_devices Address is found
+
+  block:
+  - ovirt_nic_info:
+      auth: "{{ovirt_auth}}"
+      vm: test-vm
+      name: eth0
+    register: vm_nics
+    delegate_to: localhost
+
+  - name: Set the retry count
+    set_fact:
+      retry_count: "{{ 0 if retry_count is undefined else retry_count|int + 1 }}"
+
+  - wait_for:
+      timeout: "{{ 2 }}"
+    delegate_to: localhost
+    
+  - name: list all the reported_devices for the NIC
+    uri:
+      url: "https://{{ ovirt_auth['url'] | urlsplit('hostname')  }}{{ vm_nics.ovirt_nics[0].href }}/reporteddevices"
+      method: GET
+      headers:
+        Version: "4"
+        Authorization: "Bearer {{ ovirt_auth['token'] }}"
+        Accept: "application/json"
+      status_code: 200
+      validate_certs: no
+    register: reported_ips
+    delegate_to: localhost
+
+  - assert:
+      that: 
+        - reported_ips.json.reported_device is defined
+        - reported_ips.json.reported_device[0].ips.ip[0].address | ipv4
+
+  - set_fact:
+      collected_address: "{{ reported_ips.json.reported_device[0].ips.ip[0].address }}"
+
+  rescue:
+  - fail:
+      msg: Ended after 45 retries
+    when: retry_count|int == 45
+
+  - debug:
+      msg: "Failed to connect - Retrying..."
+
+  - include_tasks: wait_until_reachable.yml

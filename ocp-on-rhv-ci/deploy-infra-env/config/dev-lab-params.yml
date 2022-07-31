@@ -1,0 +1,27 @@
+---
+
+data_center_name: Default
+storage_name: OCP_STORAGE
+cluster_description: OCP
+cluster_name: Default
+ocp_network_prefix: "ovn-vmnet"
+ocp_network_count: 11
+ocp_network_start: 10
+mgmt_network: ovirtmgmt
+template_name: centos-7
+mgmt_mac_address: 00:1a:4a:23:17:2e
+engine_fqdn: vm-10-208.lab.eng.tlv2.redhat.com
+mgmt_boot_protocol: dhcp
+base_domain: gzaidman-ocp.lab.eng.tlv2.redhat.com
+ocp_dns: true
+ocp_network_profile: ovn-vmnet-10
+ocp_networks:
+- nic: eth1
+  name: net-10
+  dhcp_range: 192.168.210.101,192.168.210.150,5m
+  address: 192.168.210.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.210.32
+  api_internal_address: 192.168.210.30
+  api_fqdn: api.ovirt10.gzaidman-ocp.lab.eng.tlv2.redhat.com
+  apps_fqdn: apps.ovirt10.gzaidman-ocp.lab.eng.tlv2.redhat.com
