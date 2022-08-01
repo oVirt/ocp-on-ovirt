@@ -1,0 +1,49 @@
+---
+- name: create ocp-for-rhv CI env
+  hosts: localhost
+  vars:
+    ovirt_engine_url: "{{ lookup('env','OVIRT_ENGINE_URL') }}"
+    ovirt_engine_username: "{{ lookup('env','OVIRT_ENGINE_USERNAME') }}"
+    ovirt_engine_password: "{{ lookup('env','OVIRT_ENGINE_PASSWORD') }}"
+    ovirt_engine_hostname: "{{ ovirt_engine_url | urlsplit('hostname') }}"
+    bootstrap_tfvars_conf: "{{ lookup('env','BOOTSTRAP_TFVARS') }}"
+    bootstrap_conf: "{{ lookup('file', bootstrap_tfvars_conf ) | from_json }}"
+    must_gather_saved_path: "{{ lookup('env','MUST_GATHER_PATH') }}"
+
+  tasks:
+    - name: download CA file from engine
+      get_url:
+        url: "https://{{ ovirt_engine_url | urlsplit('hostname') }}/ovirt-engine/services/pki-resource?resource=ca-certificate&format=X509-PEM-CA"
+        dest: "/tmp/ca.pem"
+        validate_certs: no
+
+    - set_fact: " vm_id={{ bootstrap_conf.bootstrap_vm_id }} "
+    - name: Login to RHV
+      ovirt_auth:
+        url: "{{ ovirt_engine_url }}"
+        username: "{{ ovirt_engine_username }}"
+        password: "{{ ovirt_engine_password }}"
+        ca_file: "/tmp/ca.pem"
+        insecure: "true"
+    - name: find bootstrap IP Address reported by oVirt vm_id
+      include_tasks: find_reported_address.yml
+
+    - debug: msg="found IP address - {{ collected_address }}"
+
+    - name: Add bootsrap IP address
+      add_host:
+        hostname: '{{ collected_address }}'
+        name: bootsrap
+        ansible_ssh_host: '{{ collected_address }}'
+        ansible_ssh_user: core    
+
+    - block: 
+        - ping: 
+        - name: generating the log bundle
+          command: /usr/local/bin/installer-gather.sh --id bootstrap      
+        - name: fetching generated ocp log bundle
+          fetch: 
+            src: /var/home/core/log-bundle-bootstrap.tar.gz 
+            dest: "{{must_gather_saved_path}}"
+            flat: yes
+      delegate_to: bootsrap
