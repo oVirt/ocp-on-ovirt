@@ -3,7 +3,7 @@
   block:
   - ovirt_nic_info:
       auth: "{{ovirt_auth}}"
-      vm: proxy-vm
+      vm: "{{proxy_vm_name | default('proxy-vm')}}"
       name: eth0
     register: vm_nics
     delegate_to: localhost
