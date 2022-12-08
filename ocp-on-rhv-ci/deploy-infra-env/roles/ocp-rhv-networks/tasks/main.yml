@@ -2,6 +2,11 @@
 #create ovn internal networks using ovirt_network (ovirtsdk4)
 - ovirt_network:
     data_center: "{{data_center_name}}"
+    clusters:
+      - name: "{{cluster_name}}"
+        assigned: true
+        required: false
+
     name: "{{item}}"
     vm_network: yes
     external_provider: ovirt-provider-ovn
