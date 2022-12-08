@@ -8,6 +8,8 @@
     auth: "{{ovirt_auth}}"
     memory: 2GiB
     state: running
+    bios_type: "i440fx_sea_bios"
+    delete_protected: true
     high_availability: true
     high_availability_priority: 50
     host: "{{host_running_proxy | default(omit)}}"
@@ -71,7 +73,7 @@
   ovirt_nic:
     state: present
     auth: "{{ovirt_auth}}"
-    vm: proxy-vm
+    vm: "{{proxy_vm_name | default('proxy-vm')}}"
     name: "{{item.nic}}"
     network: "ovn-vm{{item.name}}"
   with_items: "{{ocp_networks}}"
