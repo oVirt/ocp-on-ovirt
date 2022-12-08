@@ -1,0 +1,163 @@
+---
+
+proxy_vm_name: proxy-vm-45
+data_center_name: OCP-45
+storage_name: nfs-ovirt45
+cluster_description: OCP-45
+cluster_name: OCP-45
+external_address: 52.117.142.2
+external_netmask: 255.255.255.240
+external_gateway: 52.117.142.1
+mgmt_boot_protocol: static
+ocp_network_prefix: "ovn-vmnet"
+ocp_network_count: 16
+ocp_network_start: 10
+mgmt_network: ovirtmgmt
+external_hostname: ovirt-proxy-vm-1.rhv45.gcp.devcluster.openshift.com
+template_name: centos-7
+base_domain: gcp.devcluster.openshift.com
+ocp_networks:
+- nic: eth1
+  name: net-10
+  dhcp_range: 192.168.210.101,192.168.210.150,5m
+  address: 192.168.210.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.210.32
+  api_internal_address: 192.168.210.30
+  api_fqdn: api.ovirt10.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt10.gcp.devcluster.openshift.com
+- nic: eth2
+  name: net-11
+  dhcp_range: 192.168.211.101,192.168.211.150,5m
+  address: 192.168.211.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.211.32
+  api_internal_address: 192.168.211.30
+  api_fqdn: api.ovirt11.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt11.gcp.devcluster.openshift.com
+- nic: eth3
+  name: net-12
+  dhcp_range: 192.168.212.101,192.168.212.150,5m
+  address: 192.168.212.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.212.32
+  api_internal_address: 192.168.212.30
+  api_fqdn: api.ovirt12.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt12.gcp.devcluster.openshift.com
+- nic: eth4
+  name: net-13
+  dhcp_range: 192.168.213.101,192.168.213.150,5m
+  address: 192.168.213.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.213.32
+  api_internal_address: 192.168.213.30
+  api_fqdn: api.ovirt13.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt13.gcp.devcluster.openshift.com
+- nic: eth5
+  name: net-14
+  dhcp_range: 192.168.214.101,192.168.214.150,5m
+  address: 192.168.214.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.214.32
+  api_internal_address: 192.168.214.30
+  api_fqdn: api.ovirt14.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt14.gcp.devcluster.openshift.com
+- nic: eth6
+  name: net-15
+  dhcp_range: 192.168.215.101,192.168.215.150,5m
+  address: 192.168.215.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.215.32
+  api_internal_address: 192.168.215.30
+  api_fqdn: api.ovirt15.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt15.gcp.devcluster.openshift.com
+- nic: eth7
+  name: net-16
+  dhcp_range: 192.168.216.101,192.168.216.150,5m
+  address: 192.168.216.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.216.32
+  api_internal_address: 192.168.216.30
+  api_fqdn: api.ovirt16.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt16.gcp.devcluster.openshift.com
+- nic: eth8
+  name: net-17
+  dhcp_range: 192.168.217.101,192.168.217.150,5m
+  address: 192.168.217.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.217.32
+  api_internal_address: 192.168.217.30
+  api_fqdn: api.ovirt17.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt17.gcp.devcluster.openshift.com
+- nic: eth9
+  name: net-18
+  dhcp_range: 192.168.218.101,192.168.218.150,5m
+  address: 192.168.218.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.218.32
+  api_internal_address: 192.168.218.30
+  api_fqdn: api.ovirt18.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt18.gcp.devcluster.openshift.com
+- nic: eth10
+  name: net-19
+  dhcp_range: 192.168.219.101,192.168.219.150,5m
+  address: 192.168.219.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.219.32
+  api_internal_address: 192.168.219.30
+  api_fqdn: api.ovirt19.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt19.gcp.devcluster.openshift.com
+- nic: eth11
+  name: net-20
+  dhcp_range: 192.168.220.101,192.168.220.150,5m
+  address: 192.168.220.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.220.32
+  api_internal_address: 192.168.220.30
+  api_fqdn: api.ovirt20.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt20.gcp.devcluster.openshift.com
+- nic: eth12
+  name: net-21
+  dhcp_range: 192.168.221.101,192.168.221.150,5m
+  address: 192.168.221.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.221.32
+  api_internal_address: 192.168.221.30
+  api_fqdn: api.ovirt21.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt21.gcp.devcluster.openshift.com
+- nic: eth13
+  name: net-22
+  dhcp_range: 192.168.222.101,192.168.222.150,5m
+  address: 192.168.222.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.222.32
+  api_internal_address: 192.168.222.30
+  api_fqdn: api.ovirt22.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt22.gcp.devcluster.openshift.com
+- nic: eth14
+  name: net-23
+  dhcp_range: 192.168.223.101,192.168.223.150,5m
+  address: 192.168.223.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.223.32
+  api_internal_address: 192.168.223.30
+  api_fqdn: api.ovirt23.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt23.gcp.devcluster.openshift.com
+- nic: eth15
+  name: net-24
+  dhcp_range: 192.168.224.101,192.168.224.150,5m
+  address: 192.168.224.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.224.32
+  api_internal_address: 192.168.24.30
+  api_fqdn: api.ovirt24.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt24.gcp.devcluster.openshift.com
+- nic: eth16
+  name: net-25
+  dhcp_range: 192.168.225.101,192.168.225.150,5m
+  address: 192.168.225.1
+  netmask: 255.255.255.0
+  router_internal_address: 192.168.225.32
+  api_internal_address: 192.168.225.30
+  api_fqdn: api.ovirt25.gcp.devcluster.openshift.com
+  apps_fqdn: apps.ovirt25.gcp.devcluster.openshift.com
