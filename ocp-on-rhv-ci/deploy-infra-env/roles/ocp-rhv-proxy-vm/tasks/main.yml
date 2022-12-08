@@ -2,7 +2,7 @@
 
 - name: provision VM with cloud init
   ovirt_vm:
-    name: proxy-vm
+    name: "{{proxy_vm_name | default('proxy-vm')}}"
     template: "{{template_name}}"
     cluster: "{{cluster_name}}"
     auth: "{{ovirt_auth}}"

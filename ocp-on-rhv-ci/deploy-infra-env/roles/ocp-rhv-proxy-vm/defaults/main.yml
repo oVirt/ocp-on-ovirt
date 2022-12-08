@@ -4,6 +4,7 @@ root_password: 123456
 external_nic: eth0
 template_name: centos-7
 mgmt_network: ovn-test
+proxy_vm_name: proxy-vm
 mgmt_mac_address: null
 ocp_dns: false
 ocp_networks:
