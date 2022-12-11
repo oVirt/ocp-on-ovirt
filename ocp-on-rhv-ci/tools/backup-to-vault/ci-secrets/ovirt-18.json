@@ -2,6 +2,7 @@
   "ovirt_apivip": "192.168.218.30",
   "ovirt_dnsvip": "192.168.218.31",
   "ovirt_ingressvip": "192.168.218.32",
+  "ovirt_cluster_id": "46991e3f-8752-4ab6-9f2d-c37a98358d52",
   "cluster_name": "ovirt18",
   "ovirt_network_name": "ovn-vmnet-18",
   "ovirt_storage_domain_id": "400fda00-7e3d-49fd-ad35-315bf2df6292",
