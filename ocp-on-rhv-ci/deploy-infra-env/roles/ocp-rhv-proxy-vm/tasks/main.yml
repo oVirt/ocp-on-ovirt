@@ -187,6 +187,7 @@
       dhcp-authoritative
       log-queries
       dhcp-option=3,{{item.address}}
+      local=8.8.8.8
       domain={{base_domain}}
       dhcp-leasefile=/var/lib/dnsmasq/{{item.name}}.leases
   with_items: "{{ocp_networks}}"
